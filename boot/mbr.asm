@@ -22,7 +22,7 @@ SECTION MBR vstart=0x7c00
 ; 从磁盘中读取Loader
     mov eax, LOADER_START_SECTOR
     mov bx, LOADER_BASE_ADDR
-    mov cx, 1
+    mov cx, 4
     call RdDiskM16
 
     jmp LOADER_BASE_ADDR     ; 跳转到Loader起始地址
