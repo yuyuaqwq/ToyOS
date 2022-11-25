@@ -90,7 +90,7 @@ RdDiskM16:
     mov cx, ax
 
     mov dx, 0x1f0
-.goOnRead
+.goOnRead:
     in ax, dx
     mov [bx], ax
     add bx, 2

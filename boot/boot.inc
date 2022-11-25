@@ -32,3 +32,5 @@ RPL2 equ 0x2
 RPL3 equ 0x3
 TI_GDT equ (0b << 3)
 TI_LDT equ (1b << 3)
+
+;----------页表项属性----------
