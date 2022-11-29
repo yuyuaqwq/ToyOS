@@ -1,0 +1,463 @@
+     1                                  %include "boot.inc"
+     2                              <1> ;----------Loader----------
+     3                              <1> LOADER_BASE_ADDR equ 0x900
+     4                              <1> LOADER_START_SECTOR equ 0x2
+     5                              <1> 
+     6                              <1> PAGE_DIR_TABLE_POS equ 0x100000
+     7                              <1> 
+     8                              <1> ;----------kernel----------
+     9                              <1> KERNEL_BIN_BASE_ADDR equ 0x70000
+    10                              <1> KERNEL_ENTRY_POINT equ 0xc0001500
+    11                              <1> KERNEL_START_SECTOR equ 0x9
+    12                              <1> 
+    13                              <1> ;----------gtd描述符属性----------
+    14                              <1> DESC_G_4K equ (1b << 23)
+    15                              <1> DESC_D_32 equ (1b << 22)
+    16                              <1> DESC_L equ (0b << 21)      ; 64位代码标记
+    17                              <1> DESC_AVL equ (0b << 20)        ; CPU未使用
+    18                              <1> DESC_LIMIT_CODE2 equ (0xf << 16)
+    19                              <1> DESC_LIMIT_DATA2 equ (0xf << 16)
+    20                              <1> DESC_LIMIT_VIDEO2 equ (0x0 << 16)
+    21                              <1> DESC_P equ (1b << 15)
+    22                              <1> DESC_DPL_0 equ (0x0 << 13)
+    23                              <1> DESC_DPL_1 equ (0x1 << 13)
+    24                              <1> DESC_DPL_2 equ (0x2 << 13)
+    25                              <1> DESC_DPL_3 equ (0x3 << 13)
+    26                              <1> DESC_S_CODE equ (1b << 12)
+    27                              <1> DESC_S_DATA equ (1b << 12)
+    28                              <1> DESC_S_SYS equ (0b << 12)
+    29                              <1> DESC_TYPE_CODE equ (0x8 << 8)
+    30                              <1> DESC_TYPE_DATA equ (0x2 << 8)
+    31                              <1> 
+    32                              <1> DESC_CODE_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_CODE2 | DESC_P | DESC_DPL_0 | DESC_S_CODE | DESC_TYPE_CODE | 0x00)
+    33                              <1> DESC_DATA_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_DATA2 | DESC_P | DESC_DPL_0 | DESC_S_DATA | DESC_TYPE_DATA | 0x00)
+    34                              <1> DESC_VIDEO_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_VIDEO2 | DESC_P | DESC_DPL_0 | DESC_S_DATA | DESC_TYPE_DATA | 0x0b)
+    35                              <1> 
+    36                              <1> ;----------段选择子属性----------
+    37                              <1> RPL0 equ 00b
+    38                              <1> RPL1 equ 01b
+    39                              <1> RPL2 equ 10b
+    40                              <1> RPL3 equ 11b
+    41                              <1> TI_GDT equ (0b << 2)
+    42                              <1> TI_LDT equ (1b << 2)
+    43                              <1> 
+    44                              <1> ;----------页表项属性----------
+    45                              <1> PG_P equ 1b
+    46                              <1> PG_RW_R equ (0b << 1)
+    47                              <1> PG_RW_W equ (1b << 1)
+    48                              <1> PG_US_S equ (0b << 2)
+    49                              <1> PG_US_U equ (1b << 2)
+     2                                  section loader vstart=LOADER_BASE_ADDR
+     3                                  
+     4                                  LOADER_STACK_TOP equ LOADER_BASE_ADDR
+     5                                  
+     6                                  SELECTOR_CODE equ (0x0001 << 3) | TI_GDT | RPL0
+     7                                  SELECTOR_DATA equ (0x0002 << 3) | TI_GDT | RPL0
+     8                                  SELECTOR_VIDEO equ (0x0003 << 3) | TI_GDT | RPL0
+     9                                  
+    10                                  
+    11 00000000 E90003                      jmp loaderStart
+    12                                  
+    13                                  ; GDT，全局描述符表
+    14                                  
+    15                                  GDT_BASE:
+    16 00000003 00000000                    dd 0x00000000
+    17 00000007 00000000                    dd 0x00000000
+    18                                  
+    19                                  CODE_DESC:
+    20 0000000B FFFF0000                    dd 0x0000ffff
+    21 0000000F 0098CF00                    dd DESC_CODE_HIGH4
+    22                                  
+    23                                  DATA_STACK_DESC:
+    24 00000013 FFFF0000                    dd 0x0000ffff
+    25 00000017 0092CF00                    dd DESC_DATA_HIGH4
+    26                                  
+    27                                  VIDEO_DESC:
+    28 0000001B 07000080                    dd 0x80000007
+    29 0000001F 0B92C000                    dd DESC_VIDEO_HIGH4
+    30                                  
+    31                                  GDT_SIZE equ $ - GDT_BASE
+    32                                  GDT_LIMIT equ GDT_SIZE - 1
+    33                                  
+    34 00000023 0000000000000000-           times 60 dq 0       ; 预留60个描述符空位
+    34 00000023 <rep 3Ch>          
+    35                                  
+    36                                  
+    37                                  ; 物理内存总数，在内存中的地址是0xb00
+    38 00000203 00000000                    memBytesTotal dd 0
+    39                                  
+    40                                  
+    41                                  ; lgdt时提供的48位数据
+    42 00000207 1F00                        gdtPtr dw GDT_LIMIT
+    43 00000209 [03000000]                          dd GDT_BASE
+    44                                      
+    45                                  ; 除开GDT外的数据区为256字节
+    46 0000020D 00<rep F4h>                 ardsBuf times 244 db 0
+    47 00000301 0000                        ardsNr dw 0     ; 记录ARDS结构体数量
+    48                                      
+    49                                  
+    50                                  
+    51                                  
+    52                                  ; Loader
+    53                                  loaderStart:
+    54                                  
+    55 00000303 6631DB                      xor ebx, ebx
+    56 00000306 66BA50414D53                mov edx, 0x534d4150
+    57 0000030C BF[0D02]                    mov di, ardsBuf
+    58                                  
+    59                                  ; 0xE820 方法获取物理内存信息
+    60                                  .e820MemGetLoop:
+    61 0000030F 66B820E80000                mov eax, 0x0000e820     ; 每次都要更新子功能号
+    62 00000315 66B914000000                mov ecx, 20     ; ARDS地址范围描述符结构体大小是20字节
+    63 0000031B CD15                        int 0x15
+    64 0000031D 7232                        jc .e801MemGetLoop       ; cf为1表示发生错误，使用其他方法
+    65                                  
+    66 0000031F 01CF                        add di, cx      ; 更新缓冲区指针
+    67 00000321 FF06[0103]                  inc word [ardsNr]       ; ARDS数量
+    68 00000325 6683FB00                    cmp ebx, 0      ; ebx为0且cf不为1，说明ARDS全部返回
+    69 00000329 75E4                        jnz .e820MemGetLoop     ; 获取下一个
+    70                                  
+    71                                  ; 遍历ARDS结构获取总大小
+    72 0000032B 8B0E[0103]                  mov cx, [ardsNr]
+    73 0000032F 66BB[0D020000]              mov ebx, ardsBuf
+    74 00000335 6631D2                      xor edx, edx
+    75                                  
+    76                                  .findMaxMemArea:
+    77 00000338 66678B03                    mov eax, [ebx]      ; base_add_low
+    78 0000033C 6667034308                  add eax, [ebx+8]    ; +length_low，比如总大小是0x1000，最后一块是0xc00 + 0x400，正好就是总大小
+    79 00000341 6683C314                    add ebx, 20
+    80 00000345 6639C2                      cmp edx, eax
+    81 00000348 7D03                        jge .nextArds
+    82 0000034A 6689C2                      mov edx, eax        ; 更新最大的内存容量
+    83                                  
+    84                                  .nextArds:
+    85 0000034D E2E9                        loop .findMaxMemArea
+    86 0000034F EB58                        jmp .memGetOk
+    87                                  
+    88                                  ; 0xE801 方法获取物理内存信息
+    89                                  .e801MemGetLoop:
+    90 00000351 B801E8                      mov ax, 0xe801
+    91 00000354 CD15                        int 0x15
+    92 00000356 7232                        jc .88MemGetLoop
+    93                                  
+    94                                      ; 1.算出低15MB的内存
+    95                                      ; ax和cx中是KB为单位的内存大小，转换为byte单位
+    96 00000358 B90004                      mov cx, 0x400       ; cx和ax值一样，cx作乘数
+    97 0000035B F7E1                        mul cx
+    98 0000035D 66C1E210                    shl edx, 16
+    99 00000361 6625FFFF0000                and eax, 0x0000ffff
+   100 00000367 6609C2                      or edx, eax
+   101 0000036A 6681C200001000              add edx, 0x100000       ; ax只有15MB，故加1MB
+   102 00000371 6689D6                      mov esi, edx        ; 低15MB的内存容量存入esi备份
+   103                                  
+   104                                      ; 2.将16MB以上的内存转换为byte单位
+   105                                      ; bx和dx中是以64KB为单位的内存大小
+   106 00000374 6631C0                      xor eax, eax
+   107 00000377 89D8                        mov ax, bx
+   108 00000379 66B900000100                mov ecx, 0x10000        ; 64KB
+   109 0000037F 66F7E1                      mul ecx
+   110                                  
+   111 00000382 6601C6                      add esi, eax
+   112 00000385 6689F2                      mov edx, esi
+   113 00000388 EB1F                        jmp .memGetOk
+   114                                  
+   115                                  
+   116                                  ; 0x88 方法获取物理内存信息
+   117                                  .88MemGetLoop:
+   118 0000038A B488                        mov ah, 0x88
+   119 0000038C CD15                        int 0x15
+   120 0000038E 7220                        jc .errorHlt
+   121                                      
+   122                                      ; ax单位为KB，将ax的内存大小转换为byte单位
+   123 00000390 6625FFFF0000                and eax, 0x0000ffff
+   124 00000396 B90004                      mov cx, 0x400
+   125 00000399 F7E1                        mul cx
+   126 0000039B 66C1E210                    shl edx, 16
+   127 0000039F 6609C2                      or edx, eax
+   128 000003A2 6681C200001000              add edx, 0x100000       ; 只会返回1MB以上的内存，故实际内存需要加上1MB
+   129                                  
+   130                                  .memGetOk:
+   131 000003A9 668916[0302]                mov [memBytesTotal], edx        ; 保存可用内存总数
+   132 000003AE EB03                        jmp readyEntryProtectedMode
+   133                                      
+   134                                  .errorHlt:
+   135 000003B0 F4                          hlt
+   136 000003B1 EBFD                        jmp .errorHlt
+   137                                  
+   138                                  ; 准备进入保护模式
+   139                                  readyEntryProtectedMode:
+   140                                      ; 1.打开A20地址线
+   141 000003B3 E492                        in al, 0x92
+   142 000003B5 0C02                        or al, 0x02
+   143 000003B7 E692                        out 0x92, al
+   144                                  
+   145                                      ; 2.加载GDT
+   146 000003B9 0F0116[0702]                lgdt [gdtPtr]
+   147                                  
+   148                                      ; 3.cr0.PE置1
+   149 000003BE 0F20C0                      mov eax, cr0
+   150 000003C1 6683C801                    or eax, 0x00000001
+   151 000003C5 0F22C0                      mov cr0, eax
+   152                                  
+   153                                  ; 正式进入保护模式
+   154 000003C8 66EA[D0030000]0800          jmp dword SELECTOR_CODE:protectionModeStart     ; 刷新流水线，并加载cs，指令能得以执行是因为实模式和保护模式都会优先使用段缓存寄存器里面的基址，此时cs中的隐藏基址依旧是正确的。
+   155                                  
+   156                                  [bits 32]
+   157                                  protectionModeStart:
+   158 000003D0 66B81000                    mov ax, SELECTOR_DATA
+   159 000003D4 8ED8                        mov ds, ax
+   160 000003D6 8EC0                        mov es, ax
+   161 000003D8 8ED0                        mov ss, ax
+   162 000003DA BC00090000                  mov esp, LOADER_STACK_TOP
+   163 000003DF 66B81800                    mov ax, SELECTOR_VIDEO
+   164 000003E3 8EE8                        mov gs, ax
+   165                                      
+   166                                  ; 读取kernel.bin
+   167 000003E5 B809000000                  mov eax, KERNEL_START_SECTOR
+   168 000003EA BB00000700                  mov ebx, KERNEL_BIN_BASE_ADDR       ; 临时存放内核执行文件，用于拉伸
+   169 000003EF B9C8000000                  mov ecx, 200        ; 读取200扇区
+   170 000003F4 E8DA000000                  call RdDiskM32
+   171                                  
+   172                                  
+   173                                  
+   174                                  
+   175                                  ; 准备启用分页模式
+   176 000003F9 E82E010000                  call SetupPage
+   177                                  
+   178 000003FE 0F0105[07020000]            sgdt [gdtPtr]       ; 需要重新加载GDT，先保存
+   179                                  
+   180 00000405 8B1D[09020000]              mov ebx, [gdtPtr + 2]       ; 获得GDTBase
+   181 0000040B 814B1C000000C0              or dword [ebx + 0x18 + 4], 0xc0000000       ; GDT[2]是视频段描述符，修改基址
+   182 00000412 8105[09020000]0000-         add dword [gdtPtr + 2], 0xc0000000      ; 启用分页后，访问GDT的地址会变为虚拟地址
+   182 0000041A 00C0               
+   183 0000041C 81C4000000C0                add esp, 0xc0000000     ; 栈指针修改为虚拟地址
+   184                                  
+   185                                      ; cr3是页目录物理地址
+   186 00000422 B800001000                  mov eax, PAGE_DIR_TABLE_POS
+   187 00000427 0F22D8                      mov cr3, eax
+   188                                  
+   189                                      ; 开启分页模式
+   190 0000042A 0F20C0                      mov eax, cr0
+   191 0000042D 0D00000080                  or eax, 0x80000000
+   192 00000432 0F22C0                      mov cr0, eax
+   193                                  
+   194                                      ; cs段描述符缓存的基址都是0，且ip指向的虚拟地址已经提前映射到相同的物理地址上了，所以指令是能够正常继续执行的
+   195 00000435 0F0115[07020000]            lgdt [gdtPtr]
+   196                                  
+   197 0000043C EA[43040000]0800            jmp SELECTOR_CODE:entryKernel       ; 强制刷新流水线，测试没有问题，稳妥起见
+   198                                  entryKernel:
+   199 00000443 E812000000                  call KernelInit
+   200 00000448 83F800                      cmp eax, 0
+   201 0000044B 740A                        je .error
+   202                                  
+   203 0000044D BC00F009C0                  mov esp, 0xc009f000
+   204 00000452 E9(001500C0)                jmp KERNEL_ENTRY_POINT      ; 控制权交给Kernel
+   205                                  
+   206                                  .error:
+   207 00000457 F4                          hlt
+   208 00000458 EBFD                        jmp .error
+   209                                  
+   210                                  ;----------加载内核----------
+   211                                  KernelInit:
+   212 0000045A 53                          push ebx
+   213 0000045B 52                          push edx
+   214 0000045C 57                          push edi
+   215                                      
+   216                                  
+   217 0000045D BB00000700                  mov ebx, KERNEL_BIN_BASE_ADDR
+   218                                  
+   219 00000462 66813B4D5A                  cmp word [ebx], 'MZ'
+   220 00000467 754E                        jne .error
+   221                                  
+   222 00000469 BF3C000000                  mov edi, 0x3c
+   223                                  
+   224 0000046E 031C3B                      add ebx, [ebx+edi]  ; 访问dosHeader.e_lfanew，使ebx指向ntHeader32
+   225                                  
+   226 00000471 813B50450000                cmp dword [ebx], 'PE'
+   227 00000477 753E                        jne .error
+   228                                  
+   229 00000479 83C304                      add ebx, 4      ; ebx指向fileHeader
+   230                                      
+   231 0000047C 31C9                        xor ecx, ecx
+   232 0000047E 668B4B02                    mov cx, [ebx+0x2]      ; fileHeader.NumberOfSections
+   233 00000482 31C0                        xor eax, eax
+   234 00000484 668B4310                    mov ax, [ebx+0x10]      ; fileHeader.SizeOfOptionalHeader
+   235                                  
+   236                                      
+   237 00000488 83C314                      add ebx, 0x14       ; ebx指向optionalHeader32
+   238 0000048B 8B531C                      mov edx, [ebx+0x1c]     ; optionalHeader32.ImageBase
+   239                                  
+   240 0000048E 01C3                        add ebx, eax     ; ebx指向sectionsTable
+   241                                  
+   242                                  
+   243                                  ; 遍历节表拷贝节区
+   244                                  .copySectionLoop:
+   245 00000490 8B4310                      mov eax, [ebx+0x10]      ; sectionHeader.SizeOfRawData
+   246 00000493 50                          push eax        ; size
+   247                                  
+   248 00000494 8B4314                      mov eax, [ebx+0x14]      ; sectionHeader.PointerToRawData
+   249 00000497 0500000700                  add eax, KERNEL_BIN_BASE_ADDR
+   250 0000049C 50                          push eax        ; src
+   251                                  
+   252 0000049D 8B430C                      mov eax, [ebx+0xc]      ; sectionHeader.VirtualAddress
+   253 000004A0 01D0                        add eax, edx
+   254 000004A2 50                          push eax        ; dst
+   255                                  
+   256 000004A3 E818000000                  call MemCpy
+   257 000004A8 83C40C                      add esp, 0xc
+   258                                  
+   259 000004AB 83C328                      add ebx, 0x28       ; 指向下一个sectionsTable
+   260 000004AE E2E0                        loop .copySectionLoop
+   261                                  
+   262                                  
+   263 000004B0 B801000000                  mov eax, 1
+   264 000004B5 EB05                        jmp .ret
+   265                                  .error:
+   266 000004B7 B800000000                  mov eax, 0
+   267                                  .ret:
+   268                                  
+   269 000004BC 5F                          pop edi
+   270 000004BD 5A                          pop edx
+   271 000004BE 5B                          pop ebx
+   272 000004BF C3                          ret
+   273                                  
+   274                                  
+   275                                  
+   276                                  
+   277                                  ;----------内存拷贝----------
+   278                                  ; int dst, int src, int size
+   279                                  MemCpy:
+   280 000004C0 FC                          cld
+   281 000004C1 55                          push ebp
+   282 000004C2 89E5                        mov ebp, esp
+   283 000004C4 51                          push ecx        ; rep指令用到了ecx，但ecx对于外层段的循环还有用，故先入栈备份
+   284 000004C5 8B7D08                      mov edi, [ebp + 8]      ; dst
+   285 000004C8 8B750C                      mov esi, [ebp + 12]     ; src
+   286 000004CB 8B4D10                      mov ecx, [ebp + 16]     ; size
+   287 000004CE F3A4                        rep movsb       ; 逐字节拷贝
+   288                                  
+   289                                  
+   290 000004D0 59                          pop ecx		
+   291 000004D1 5D                          pop ebp
+   292 000004D2 C3                          ret
+   293                                  
+   294                                  
+   295                                  
+   296                                  
+   297                                  
+   298                                  ;----------读取扇区到内存----------
+   299                                  RdDiskM32:
+   300 000004D3 89C6                        mov esi, eax
+   301 000004D5 6689CF                      mov di, cx
+   302                                  
+   303                                  ; 1.设置要读取的扇区数
+   304 000004D8 66BAF201                    mov dx, 0x1f2
+   305 000004DC 88C8                        mov al, cl
+   306 000004DE EE                          out dx, al      ; 读取扇区数
+   307 000004DF 89F0                        mov eax, esi
+   308                                  
+   309                                  ; 2.将LBA存入0x1f3 ~ 0x1f6
+   310                                      ; bit7 ~ bit0
+   311 000004E1 66BAF301                    mov dx, 0x1f3
+   312 000004E5 EE                          out dx, al
+   313                                  
+   314                                      ; bit15 ~ bit8
+   315 000004E6 B108                        mov cl, 8
+   316 000004E8 D3E8                        shr eax, cl
+   317 000004EA 66BAF401                    mov dx, 0x1f4
+   318 000004EE EE                          out dx, al
+   319                                  
+   320                                      ; bit23 ~ bit16
+   321 000004EF D3E8                        shr eax, cl
+   322 000004F1 66BAF501                    mov dx, 0x1f5
+   323 000004F5 EE                          out dx, al
+   324                                  
+   325                                      ; bit31 ~ bit24
+   326 000004F6 D3E8                        shr eax, cl
+   327 000004F8 240F                        and al, 0x0f        ; LBA bit27 ~ bit24
+   328 000004FA 0CE0                        or al, 0xe0         ; bit31 ~ bit28为1110，表示LBA模式
+   329 000004FC 66BAF601                    mov dx, 0x1f6
+   330 00000500 EE                          out dx, al
+   331                                  
+   332                                  ; 3.向0x1f7端口写入读命令，0x20
+   333 00000501 66BAF701                    mov dx, 0x1f7
+   334 00000505 B020                        mov al, 0x20
+   335 00000507 EE                          out dx, al
+   336                                  
+   337                                  ; 4.检测硬盘状态
+   338                                  .notReady:
+   339                                      ; 同一端口，写时表示写入命令字，读时表示读入硬盘状态
+   340 00000508 90                          nop
+   341 00000509 EC                          in al, dx
+   342 0000050A 2488                        and al, 0x88        ; bit4为1表示硬盘控制器已准备好数据，bit7为一表示硬盘忙
+   343 0000050C 3C08                        cmp al, 0x08
+   344 0000050E 75F8                        jnz .notReady       ; 未准备好，继续等待
+   345                                  
+   346                                  ; 5.从0x1f0端口读数据
+   347                                      ; di是要读取的扇区数，一个扇区有512字节，每次读入一个字，需要di*512/2次，所以di*256
+   348 00000510 6689F8                      mov ax, di
+   349 00000513 66BA0001                    mov dx, 256
+   350 00000517 66F7E2                      mul dx
+   351 0000051A 6689C1                      mov cx, ax
+   352                                  
+   353 0000051D 66BAF001                    mov dx, 0x1f0
+   354                                  .goOnRead:
+   355 00000521 66ED                        in ax, dx
+   356 00000523 668903                      mov [ebx], ax
+   357 00000526 83C302                      add ebx, 2
+   358 00000529 E2F6                        loop .goOnRead
+   359 0000052B C3                          ret
+   360                                  
+   361                                  
+   362                                  
+   363                                  
+   364                                  
+   365                                  
+   366                                  ; ----------创建页目录及页表----------
+   367                                  SetupPage:
+   368                                      ; 存放页目录的页面清0
+   369 0000052C B900100000                  mov ecx , 0x1000
+   370 00000531 BE00000000                  mov esi, 0
+   371                                  .clearPageDir:
+   372 00000536 C6860000100000              mov byte [PAGE_DIR_TABLE_POS + esi], 0
+   373 0000053D 46                          inc esi
+   374 0000053E E2F6                        loop .clearPageDir
+   375                                  
+   376                                      ; 创建页目录项(PDE)
+   377                                  .createPDE:
+   378 00000540 B800001000                  mov eax, PAGE_DIR_TABLE_POS
+   379 00000545 83C807                      or eax, PG_US_U | PG_RW_W | PG_P        ; 加上属性，组成PDE
+   380                                  
+   381 00000548 A3FC0F1000                  mov [PAGE_DIR_TABLE_POS + 0xffc], eax       ; 写到PDT[0x3ff]中，即页目录自映射
+   382                                  
+   383                                      ; 创建页表(PTT)
+   384 0000054D 0500100000                  add eax, 0x1000     ; 页目录页面之后紧挨着的第一个页面的基址，0x101000，用于PDT[0x300]指向的页表
+   385 00000552 A3000C1000                  mov [PAGE_DIR_TABLE_POS + 0xc00], eax       ; 写到PDT[0x300]中
+   386 00000557 A300001000                  mov [PAGE_DIR_TABLE_POS + 0x0], eax       ; 写到PDT[0x0]中
+   387                                  
+   388                                  
+   389                                      ; 创建页表项(PTE)，将物理地址 0x00000 ~ 0xfffff 映射到虚拟地址 0x00000000 ~ 0x000fffff 和 0xc0000000 ~ 0xc00fffff
+   390 0000055C BB00001000                  mov ebx, PAGE_DIR_TABLE_POS
+   391 00000561 81C300100000                add ebx, 0x1000     ; PDT[0x300]指向的页表
+   392 00000567 B900010000                  mov ecx, 256        ; 256项
+   393 0000056C BE00000000                  mov esi, 0
+   394 00000571 BA07000000                  mov edx, PG_US_U | PG_RW_W | PG_P       ; base为0
+   395                                  .createPTE:
+   396 00000576 8914B3                      mov [ebx+esi*4], edx        ; PDT[0x300]指向的页表
+   397 00000579 81C200100000                add edx, 0x1000     ; base += 0x1000
+   398 0000057F 46                          inc esi
+   399 00000580 E2F4                        loop .createPTE
+   400                                  
+   401                                      ; 为内核剩余页目录项分配页表
+   402 00000582 B800001000                  mov eax, PAGE_DIR_TABLE_POS
+   403 00000587 0500200000                  add eax, 0x2000     ; 页目录页面之后紧挨着的第二个页面的基址，0x102000，用于PDT[0x301]指向的页表
+   404 0000058C 83C807                      or eax, PG_US_U | PG_RW_W | PG_P
+   405 0000058F BB00001000                  mov ebx, PAGE_DIR_TABLE_POS
+   406 00000594 B9FE000000                  mov ecx, 254
+   407 00000599 BE01030000                  mov esi, 0x301      ; 范围为 0x301 ~ 0x3fe 的所有PDE
+   408                                  .createKernelPDE:
+   409 0000059E 8904B3                      mov [ebx+esi*4], eax
+   410 000005A1 46                          inc esi
+   411 000005A2 0500100000                  add eax, 0x1000     ; 继续使用下一个物理页面当作PTT
+   412 000005A7 E2F5                        loop .createKernelPDE
+   413 000005A9 C3                          ret
