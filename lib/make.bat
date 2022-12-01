@@ -1,0 +1,1 @@
+..\tools\nasm -f coff -o ..\build\print.o -l ..\build\print.lst .\kernel\print.asm

@@ -1,9 +1,10 @@
 #cd .\boot
 #.\make.bat
 #cd ..
-#cd .\kernel
-#.\make.bat
-#cd ..
+
+cd .\kernel
+call .\make.bat
+cd ..
 
 .\tools\filecp.exe .\build\disk.vhd 0 .\build\mbr.bin
 .\tools\filecp.exe .\build\disk.vhd 1024 .\build\loader.bin

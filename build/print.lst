@@ -121,7 +121,7 @@
    121 0000009D 66BAD503                    mov dx, 0x03d5
    122 000000A1 EC                          in al, dx
    123                                  
-   124 000000A2 6689C3                      mov bx, ax      ; 光标位置存入bx
+   124 000000A2 6689C3                      mov bx, ax      ; bx保存光标位置
    125 000000A5 8B4C2424                    mov ecx, [esp+36]       ; charAscii，待打印字符
    126                                  
    127                                  ; 控制字符的特殊处理

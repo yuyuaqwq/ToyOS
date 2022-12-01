@@ -1,0 +1,1 @@
+gcc -m32 -c -o ..\build\timer.o -I .. timer.c

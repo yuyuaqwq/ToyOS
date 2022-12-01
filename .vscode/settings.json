@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "init.h": "c",
+        "print.h": "c",
+        "interrupt.h": "c",
+        "global.h": "c",
+        "debug.h": "c"
+    }
+}

@@ -2,13 +2,11 @@
 %define ERROR_CODE nop
 %define ZERO push 0
 
-extern PutStr
+extern _gIdtTable
 
 section .data
-intrStr db "interrupt occur!", 0xa, 0
-
-global intrEntryTable
-intrEntryTable:
+global _gIntrEntryTable
+_gIntrEntryTable:
 
 %macro VECTOR 2
 section .text
@@ -16,53 +14,69 @@ section .text
 intr%1Entry:
 
     %2
-    push intrStr
-    call PutStr
-    add esp, 4
+    push ds
+    push es
+    push fs
+    push gs
+    pushad
 
+    ; 告知8259A中断处理完成
     mov al, 0x20
     out 0xa0, al
     out 0x20, al
 
-    add esp, 4
-    iret
+    push %1
+    call [_gIdtTable + %1*4]        ; 调用C版本的中断处理函数
+    jmp IntrExit
 
 section .data
-    dd intr%1Eentry
+    dd intr%1Entry
 
 %endmacro
 
+section .text
+global IntrExit
+IntrExit:
+    add esp, 4
+    popad
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    add esp, 4      ; 跳过errorCode
+    iretd
 
-VECRIR 0x00, ZERO
-VECRIR 0x01, ZERO
-VECRIR 0x02, ZERO
-VECRIR 0x03, ZERO
-VECRIR 0x04, ZERO
-VECRIR 0x05, ZERO
-VECRIR 0x06, ZERO
-VECRIR 0x07, ZERO
-VECRIR 0x08, ZERO
-VECRIR 0x09, ZERO
-VECRIR 0x0a, ZERO
-VECRIR 0x0b, ZERO
-VECRIR 0x0c, ZERO
-VECRIR 0x0d, ZERO
-VECRIR 0x0e, ZERO
-VECRIR 0x0f, ZERO
-VECRIR 0x10, ZERO
-VECRIR 0x11, ZERO
-VECRIR 0x12, ZERO
-VECRIR 0x13, ZERO
-VECRIR 0x14, ZERO
-VECRIR 0x15, ZERO
-VECRIR 0x16, ZERO
-VECRIR 0x17, ZERO
-VECRIR 0x18, ZERO
-VECRIR 0x19, ZERO
-VECRIR 0x1a, ZERO
-VECRIR 0x1b, ZERO
-VECRIR 0x1c, ZERO
-VECRIR 0x1d, ZERO
-VECRIR 0x1e, ERROR_CODE
-VECRIR 0x1f, ZERO
-VECRIR 0x20, ZERO
+
+VECTOR 0x00, ZERO
+VECTOR 0x01, ZERO
+VECTOR 0x02, ZERO
+VECTOR 0x03, ZERO
+VECTOR 0x04, ZERO
+VECTOR 0x05, ZERO
+VECTOR 0x06, ZERO
+VECTOR 0x07, ZERO
+VECTOR 0x08, ERROR_CODE
+VECTOR 0x09, ZERO
+VECTOR 0x0a, ERROR_CODE
+VECTOR 0x0b, ERROR_CODE
+VECTOR 0x0c, ZERO
+VECTOR 0x0d, ERROR_CODE
+VECTOR 0x0e, ERROR_CODE
+VECTOR 0x0f, ZERO
+VECTOR 0x10, ZERO
+VECTOR 0x11, ERROR_CODE
+VECTOR 0x12, ZERO
+VECTOR 0x13, ZERO
+VECTOR 0x14, ZERO
+VECTOR 0x15, ZERO
+VECTOR 0x16, ZERO
+VECTOR 0x17, ZERO
+VECTOR 0x18, ERROR_CODE
+VECTOR 0x19, ZERO
+VECTOR 0x1a, ERROR_CODE
+VECTOR 0x1b, ERROR_CODE
+VECTOR 0x1c, ZERO
+VECTOR 0x1d, ERROR_CODE
+VECTOR 0x1e, ERROR_CODE
+VECTOR 0x1f, ZERO
+VECTOR 0x20, ZERO

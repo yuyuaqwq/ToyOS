@@ -1,0 +1,841 @@
+     1                                  [bits 32]
+     2                                  %define ERROR_CODE nop
+     3                                  %define ZERO push 0
+     4                                  
+     5                                  extern _gIdtTable
+     6                                  
+     7                                  section .data
+     8                                  global _gIntrEntryTable
+     9                                  _gIntrEntryTable:
+    10                                  
+    11                                  %macro VECTOR 2
+    12                                  section .text
+    13                                  
+    14                                  intr%1Entry:
+    15                                  
+    16                                      %2
+    17                                      push ds
+    18                                      push es
+    19                                      push fs
+    20                                      push gs
+    21                                      pushad
+    22                                  
+    23                                      ; 告知8259A中断处理完成
+    24                                      mov al, 0x20
+    25                                      out 0xa0, al
+    26                                      out 0x20, al
+    27                                  
+    28                                      push %1
+    29                                      call [_gIdtTable + %1*4]        ; 调用C版本的中断处理函数
+    30                                      jmp IntrExit
+    31                                  
+    32                                  section .data
+    33                                      dd intr%1Entry
+    34                                  
+    35                                  %endmacro
+    36                                  
+    37                                  section .text
+    38                                  global IntrExit
+    39                                  IntrExit:
+    40 00000000 83C404                      add esp, 4
+    41 00000003 61                          popad
+    42 00000004 0FA9                        pop gs
+    43 00000006 0FA1                        pop fs
+    44 00000008 07                          pop es
+    45 00000009 1F                          pop ds
+    46 0000000A 83C404                      add esp, 4      ; 跳过errorCode
+    47 0000000D CF                          iretd
+    48                                  
+    49                                  
+    50                                  VECTOR 0x00, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000000E 6A00                <1>  %2
+    17 00000010 1E                  <1>  push ds
+    18 00000011 06                  <1>  push es
+    19 00000012 0FA0                <1>  push fs
+    20 00000014 0FA8                <1>  push gs
+    21 00000016 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000017 B020                <1>  mov al, 0x20
+    25 00000019 E6A0                <1>  out 0xa0, al
+    26 0000001B E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000001D 6A00                <1>  push %1
+    29 0000001F FF15[00000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000025 EBD9                <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000000 [0E000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    51                                  VECTOR 0x01, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000027 6A00                <1>  %2
+    17 00000029 1E                  <1>  push ds
+    18 0000002A 06                  <1>  push es
+    19 0000002B 0FA0                <1>  push fs
+    20 0000002D 0FA8                <1>  push gs
+    21 0000002F 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000030 B020                <1>  mov al, 0x20
+    25 00000032 E6A0                <1>  out 0xa0, al
+    26 00000034 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000036 6A01                <1>  push %1
+    29 00000038 FF15[04000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000003E EBC0                <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000004 [27000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    52                                  VECTOR 0x02, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000040 6A00                <1>  %2
+    17 00000042 1E                  <1>  push ds
+    18 00000043 06                  <1>  push es
+    19 00000044 0FA0                <1>  push fs
+    20 00000046 0FA8                <1>  push gs
+    21 00000048 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000049 B020                <1>  mov al, 0x20
+    25 0000004B E6A0                <1>  out 0xa0, al
+    26 0000004D E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000004F 6A02                <1>  push %1
+    29 00000051 FF15[08000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000057 EBA7                <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000008 [40000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    53                                  VECTOR 0x03, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000059 6A00                <1>  %2
+    17 0000005B 1E                  <1>  push ds
+    18 0000005C 06                  <1>  push es
+    19 0000005D 0FA0                <1>  push fs
+    20 0000005F 0FA8                <1>  push gs
+    21 00000061 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000062 B020                <1>  mov al, 0x20
+    25 00000064 E6A0                <1>  out 0xa0, al
+    26 00000066 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000068 6A03                <1>  push %1
+    29 0000006A FF15[0C000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000070 EB8E                <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000000C [59000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    54                                  VECTOR 0x04, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000072 6A00                <1>  %2
+    17 00000074 1E                  <1>  push ds
+    18 00000075 06                  <1>  push es
+    19 00000076 0FA0                <1>  push fs
+    20 00000078 0FA8                <1>  push gs
+    21 0000007A 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000007B B020                <1>  mov al, 0x20
+    25 0000007D E6A0                <1>  out 0xa0, al
+    26 0000007F E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000081 6A04                <1>  push %1
+    29 00000083 FF15[10000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000089 E972FFFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000010 [72000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    55                                  VECTOR 0x05, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000008E 6A00                <1>  %2
+    17 00000090 1E                  <1>  push ds
+    18 00000091 06                  <1>  push es
+    19 00000092 0FA0                <1>  push fs
+    20 00000094 0FA8                <1>  push gs
+    21 00000096 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000097 B020                <1>  mov al, 0x20
+    25 00000099 E6A0                <1>  out 0xa0, al
+    26 0000009B E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000009D 6A05                <1>  push %1
+    29 0000009F FF15[14000000]      <1>  call [_gIdtTable + %1*4]
+    30 000000A5 E956FFFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000014 [8E000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    56                                  VECTOR 0x06, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000000AA 6A00                <1>  %2
+    17 000000AC 1E                  <1>  push ds
+    18 000000AD 06                  <1>  push es
+    19 000000AE 0FA0                <1>  push fs
+    20 000000B0 0FA8                <1>  push gs
+    21 000000B2 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000000B3 B020                <1>  mov al, 0x20
+    25 000000B5 E6A0                <1>  out 0xa0, al
+    26 000000B7 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000000B9 6A06                <1>  push %1
+    29 000000BB FF15[18000000]      <1>  call [_gIdtTable + %1*4]
+    30 000000C1 E93AFFFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000018 [AA000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    57                                  VECTOR 0x07, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000000C6 6A00                <1>  %2
+    17 000000C8 1E                  <1>  push ds
+    18 000000C9 06                  <1>  push es
+    19 000000CA 0FA0                <1>  push fs
+    20 000000CC 0FA8                <1>  push gs
+    21 000000CE 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000000CF B020                <1>  mov al, 0x20
+    25 000000D1 E6A0                <1>  out 0xa0, al
+    26 000000D3 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000000D5 6A07                <1>  push %1
+    29 000000D7 FF15[1C000000]      <1>  call [_gIdtTable + %1*4]
+    30 000000DD E91EFFFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000001C [C6000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    58                                  VECTOR 0x08, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000000E2 90                  <1>  %2
+    17 000000E3 1E                  <1>  push ds
+    18 000000E4 06                  <1>  push es
+    19 000000E5 0FA0                <1>  push fs
+    20 000000E7 0FA8                <1>  push gs
+    21 000000E9 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000000EA B020                <1>  mov al, 0x20
+    25 000000EC E6A0                <1>  out 0xa0, al
+    26 000000EE E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000000F0 6A08                <1>  push %1
+    29 000000F2 FF15[20000000]      <1>  call [_gIdtTable + %1*4]
+    30 000000F8 E903FFFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000020 [E2000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    59                                  VECTOR 0x09, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000000FD 6A00                <1>  %2
+    17 000000FF 1E                  <1>  push ds
+    18 00000100 06                  <1>  push es
+    19 00000101 0FA0                <1>  push fs
+    20 00000103 0FA8                <1>  push gs
+    21 00000105 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000106 B020                <1>  mov al, 0x20
+    25 00000108 E6A0                <1>  out 0xa0, al
+    26 0000010A E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000010C 6A09                <1>  push %1
+    29 0000010E FF15[24000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000114 E9E7FEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000024 [FD000000]          <1>  dd intr%1Entry
+    34                              <1> 
+    60                                  VECTOR 0x0a, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000119 90                  <1>  %2
+    17 0000011A 1E                  <1>  push ds
+    18 0000011B 06                  <1>  push es
+    19 0000011C 0FA0                <1>  push fs
+    20 0000011E 0FA8                <1>  push gs
+    21 00000120 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000121 B020                <1>  mov al, 0x20
+    25 00000123 E6A0                <1>  out 0xa0, al
+    26 00000125 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000127 6A0A                <1>  push %1
+    29 00000129 FF15[28000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000012F E9CCFEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000028 [19010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    61                                  VECTOR 0x0b, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000134 90                  <1>  %2
+    17 00000135 1E                  <1>  push ds
+    18 00000136 06                  <1>  push es
+    19 00000137 0FA0                <1>  push fs
+    20 00000139 0FA8                <1>  push gs
+    21 0000013B 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000013C B020                <1>  mov al, 0x20
+    25 0000013E E6A0                <1>  out 0xa0, al
+    26 00000140 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000142 6A0B                <1>  push %1
+    29 00000144 FF15[2C000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000014A E9B1FEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000002C [34010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    62                                  VECTOR 0x0c, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000014F 6A00                <1>  %2
+    17 00000151 1E                  <1>  push ds
+    18 00000152 06                  <1>  push es
+    19 00000153 0FA0                <1>  push fs
+    20 00000155 0FA8                <1>  push gs
+    21 00000157 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000158 B020                <1>  mov al, 0x20
+    25 0000015A E6A0                <1>  out 0xa0, al
+    26 0000015C E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000015E 6A0C                <1>  push %1
+    29 00000160 FF15[30000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000166 E995FEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000030 [4F010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    63                                  VECTOR 0x0d, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000016B 90                  <1>  %2
+    17 0000016C 1E                  <1>  push ds
+    18 0000016D 06                  <1>  push es
+    19 0000016E 0FA0                <1>  push fs
+    20 00000170 0FA8                <1>  push gs
+    21 00000172 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000173 B020                <1>  mov al, 0x20
+    25 00000175 E6A0                <1>  out 0xa0, al
+    26 00000177 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000179 6A0D                <1>  push %1
+    29 0000017B FF15[34000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000181 E97AFEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000034 [6B010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    64                                  VECTOR 0x0e, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000186 90                  <1>  %2
+    17 00000187 1E                  <1>  push ds
+    18 00000188 06                  <1>  push es
+    19 00000189 0FA0                <1>  push fs
+    20 0000018B 0FA8                <1>  push gs
+    21 0000018D 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000018E B020                <1>  mov al, 0x20
+    25 00000190 E6A0                <1>  out 0xa0, al
+    26 00000192 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000194 6A0E                <1>  push %1
+    29 00000196 FF15[38000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000019C E95FFEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000038 [86010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    65                                  VECTOR 0x0f, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000001A1 6A00                <1>  %2
+    17 000001A3 1E                  <1>  push ds
+    18 000001A4 06                  <1>  push es
+    19 000001A5 0FA0                <1>  push fs
+    20 000001A7 0FA8                <1>  push gs
+    21 000001A9 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000001AA B020                <1>  mov al, 0x20
+    25 000001AC E6A0                <1>  out 0xa0, al
+    26 000001AE E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000001B0 6A0F                <1>  push %1
+    29 000001B2 FF15[3C000000]      <1>  call [_gIdtTable + %1*4]
+    30 000001B8 E943FEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000003C [A1010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    66                                  VECTOR 0x10, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000001BD 6A00                <1>  %2
+    17 000001BF 1E                  <1>  push ds
+    18 000001C0 06                  <1>  push es
+    19 000001C1 0FA0                <1>  push fs
+    20 000001C3 0FA8                <1>  push gs
+    21 000001C5 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000001C6 B020                <1>  mov al, 0x20
+    25 000001C8 E6A0                <1>  out 0xa0, al
+    26 000001CA E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000001CC 6A10                <1>  push %1
+    29 000001CE FF15[40000000]      <1>  call [_gIdtTable + %1*4]
+    30 000001D4 E927FEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000040 [BD010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    67                                  VECTOR 0x11, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000001D9 90                  <1>  %2
+    17 000001DA 1E                  <1>  push ds
+    18 000001DB 06                  <1>  push es
+    19 000001DC 0FA0                <1>  push fs
+    20 000001DE 0FA8                <1>  push gs
+    21 000001E0 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000001E1 B020                <1>  mov al, 0x20
+    25 000001E3 E6A0                <1>  out 0xa0, al
+    26 000001E5 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000001E7 6A11                <1>  push %1
+    29 000001E9 FF15[44000000]      <1>  call [_gIdtTable + %1*4]
+    30 000001EF E90CFEFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000044 [D9010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    68                                  VECTOR 0x12, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000001F4 6A00                <1>  %2
+    17 000001F6 1E                  <1>  push ds
+    18 000001F7 06                  <1>  push es
+    19 000001F8 0FA0                <1>  push fs
+    20 000001FA 0FA8                <1>  push gs
+    21 000001FC 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000001FD B020                <1>  mov al, 0x20
+    25 000001FF E6A0                <1>  out 0xa0, al
+    26 00000201 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000203 6A12                <1>  push %1
+    29 00000205 FF15[48000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000020B E9F0FDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000048 [F4010000]          <1>  dd intr%1Entry
+    34                              <1> 
+    69                                  VECTOR 0x13, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000210 6A00                <1>  %2
+    17 00000212 1E                  <1>  push ds
+    18 00000213 06                  <1>  push es
+    19 00000214 0FA0                <1>  push fs
+    20 00000216 0FA8                <1>  push gs
+    21 00000218 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000219 B020                <1>  mov al, 0x20
+    25 0000021B E6A0                <1>  out 0xa0, al
+    26 0000021D E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000021F 6A13                <1>  push %1
+    29 00000221 FF15[4C000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000227 E9D4FDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000004C [10020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    70                                  VECTOR 0x14, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000022C 6A00                <1>  %2
+    17 0000022E 1E                  <1>  push ds
+    18 0000022F 06                  <1>  push es
+    19 00000230 0FA0                <1>  push fs
+    20 00000232 0FA8                <1>  push gs
+    21 00000234 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000235 B020                <1>  mov al, 0x20
+    25 00000237 E6A0                <1>  out 0xa0, al
+    26 00000239 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000023B 6A14                <1>  push %1
+    29 0000023D FF15[50000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000243 E9B8FDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000050 [2C020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    71                                  VECTOR 0x15, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000248 6A00                <1>  %2
+    17 0000024A 1E                  <1>  push ds
+    18 0000024B 06                  <1>  push es
+    19 0000024C 0FA0                <1>  push fs
+    20 0000024E 0FA8                <1>  push gs
+    21 00000250 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000251 B020                <1>  mov al, 0x20
+    25 00000253 E6A0                <1>  out 0xa0, al
+    26 00000255 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000257 6A15                <1>  push %1
+    29 00000259 FF15[54000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000025F E99CFDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000054 [48020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    72                                  VECTOR 0x16, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000264 6A00                <1>  %2
+    17 00000266 1E                  <1>  push ds
+    18 00000267 06                  <1>  push es
+    19 00000268 0FA0                <1>  push fs
+    20 0000026A 0FA8                <1>  push gs
+    21 0000026C 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000026D B020                <1>  mov al, 0x20
+    25 0000026F E6A0                <1>  out 0xa0, al
+    26 00000271 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000273 6A16                <1>  push %1
+    29 00000275 FF15[58000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000027B E980FDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000058 [64020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    73                                  VECTOR 0x17, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000280 6A00                <1>  %2
+    17 00000282 1E                  <1>  push ds
+    18 00000283 06                  <1>  push es
+    19 00000284 0FA0                <1>  push fs
+    20 00000286 0FA8                <1>  push gs
+    21 00000288 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000289 B020                <1>  mov al, 0x20
+    25 0000028B E6A0                <1>  out 0xa0, al
+    26 0000028D E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000028F 6A17                <1>  push %1
+    29 00000291 FF15[5C000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000297 E964FDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000005C [80020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    74                                  VECTOR 0x18, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000029C 90                  <1>  %2
+    17 0000029D 1E                  <1>  push ds
+    18 0000029E 06                  <1>  push es
+    19 0000029F 0FA0                <1>  push fs
+    20 000002A1 0FA8                <1>  push gs
+    21 000002A3 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000002A4 B020                <1>  mov al, 0x20
+    25 000002A6 E6A0                <1>  out 0xa0, al
+    26 000002A8 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000002AA 6A18                <1>  push %1
+    29 000002AC FF15[60000000]      <1>  call [_gIdtTable + %1*4]
+    30 000002B2 E949FDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000060 [9C020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    75                                  VECTOR 0x19, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000002B7 6A00                <1>  %2
+    17 000002B9 1E                  <1>  push ds
+    18 000002BA 06                  <1>  push es
+    19 000002BB 0FA0                <1>  push fs
+    20 000002BD 0FA8                <1>  push gs
+    21 000002BF 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000002C0 B020                <1>  mov al, 0x20
+    25 000002C2 E6A0                <1>  out 0xa0, al
+    26 000002C4 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000002C6 6A19                <1>  push %1
+    29 000002C8 FF15[64000000]      <1>  call [_gIdtTable + %1*4]
+    30 000002CE E92DFDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000064 [B7020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    76                                  VECTOR 0x1a, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000002D3 90                  <1>  %2
+    17 000002D4 1E                  <1>  push ds
+    18 000002D5 06                  <1>  push es
+    19 000002D6 0FA0                <1>  push fs
+    20 000002D8 0FA8                <1>  push gs
+    21 000002DA 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000002DB B020                <1>  mov al, 0x20
+    25 000002DD E6A0                <1>  out 0xa0, al
+    26 000002DF E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000002E1 6A1A                <1>  push %1
+    29 000002E3 FF15[68000000]      <1>  call [_gIdtTable + %1*4]
+    30 000002E9 E912FDFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000068 [D3020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    77                                  VECTOR 0x1b, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000002EE 90                  <1>  %2
+    17 000002EF 1E                  <1>  push ds
+    18 000002F0 06                  <1>  push es
+    19 000002F1 0FA0                <1>  push fs
+    20 000002F3 0FA8                <1>  push gs
+    21 000002F5 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000002F6 B020                <1>  mov al, 0x20
+    25 000002F8 E6A0                <1>  out 0xa0, al
+    26 000002FA E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000002FC 6A1B                <1>  push %1
+    29 000002FE FF15[6C000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000304 E9F7FCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000006C [EE020000]          <1>  dd intr%1Entry
+    34                              <1> 
+    78                                  VECTOR 0x1c, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000309 6A00                <1>  %2
+    17 0000030B 1E                  <1>  push ds
+    18 0000030C 06                  <1>  push es
+    19 0000030D 0FA0                <1>  push fs
+    20 0000030F 0FA8                <1>  push gs
+    21 00000311 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000312 B020                <1>  mov al, 0x20
+    25 00000314 E6A0                <1>  out 0xa0, al
+    26 00000316 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000318 6A1C                <1>  push %1
+    29 0000031A FF15[70000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000320 E9DBFCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000070 [09030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    79                                  VECTOR 0x1d, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000325 90                  <1>  %2
+    17 00000326 1E                  <1>  push ds
+    18 00000327 06                  <1>  push es
+    19 00000328 0FA0                <1>  push fs
+    20 0000032A 0FA8                <1>  push gs
+    21 0000032C 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000032D B020                <1>  mov al, 0x20
+    25 0000032F E6A0                <1>  out 0xa0, al
+    26 00000331 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000333 6A1D                <1>  push %1
+    29 00000335 FF15[74000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000033B E9C0FCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000074 [25030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    80                                  VECTOR 0x1e, ERROR_CODE
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000340 90                  <1>  %2
+    17 00000341 1E                  <1>  push ds
+    18 00000342 06                  <1>  push es
+    19 00000343 0FA0                <1>  push fs
+    20 00000345 0FA8                <1>  push gs
+    21 00000347 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000348 B020                <1>  mov al, 0x20
+    25 0000034A E6A0                <1>  out 0xa0, al
+    26 0000034C E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000034E 6A1E                <1>  push %1
+    29 00000350 FF15[78000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000356 E9A5FCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000078 [40030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    81                                  VECTOR 0x1f, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000035B 6A00                <1>  %2
+    17 0000035D 1E                  <1>  push ds
+    18 0000035E 06                  <1>  push es
+    19 0000035F 0FA0                <1>  push fs
+    20 00000361 0FA8                <1>  push gs
+    21 00000363 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000364 B020                <1>  mov al, 0x20
+    25 00000366 E6A0                <1>  out 0xa0, al
+    26 00000368 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000036A 6A1F                <1>  push %1
+    29 0000036C FF15[7C000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000372 E989FCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000007C [5B030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    82                                  VECTOR 0x20, ZERO
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000377 6A00                <1>  %2
+    17 00000379 1E                  <1>  push ds
+    18 0000037A 06                  <1>  push es
+    19 0000037B 0FA0                <1>  push fs
+    20 0000037D 0FA8                <1>  push gs
+    21 0000037F 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000380 B020                <1>  mov al, 0x20
+    25 00000382 E6A0                <1>  out 0xa0, al
+    26 00000384 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000386 6A20                <1>  push %1
+    29 00000388 FF15[80000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000038E E96DFCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000080 [77030000]          <1>  dd intr%1Entry
+    34                              <1> 
