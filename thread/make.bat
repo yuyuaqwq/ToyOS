@@ -1,0 +1,1 @@
+gcc -m32 -c -o ..\build\thread.o -I .. thread.c

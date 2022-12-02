@@ -1,7 +1,7 @@
 #ifndef KERNEL_INTERRUPT_H_
 #define KERNEL_INTERRUPT_H_
 
-#include "stdint.h"
+#include "lib/stdint.h"
 
 typedef void* IntrHandler;
 void IdtInit(void);

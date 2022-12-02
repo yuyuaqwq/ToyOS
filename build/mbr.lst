@@ -1,52 +1,53 @@
      1                                  %include "boot.inc"
      2                              <1> ;----------Loader----------
      3                              <1> LOADER_BASE_ADDR equ 0x900
-     4                              <1> LOADER_START_SECTOR equ 0x2
-     5                              <1> 
-     6                              <1> PAGE_DIR_TABLE_POS equ 0x100000
-     7                              <1> 
-     8                              <1> ;----------kernel----------
-     9                              <1> KERNEL_BIN_BASE_ADDR equ 0x70000
-    10                              <1> KERNEL_ENTRY_POINT equ 0xc0001500
-    11                              <1> KERNEL_START_SECTOR equ 0x9
-    12                              <1> 
-    13                              <1> ;----------gtd描述符属性----------
-    14                              <1> DESC_G_4K equ (1b << 23)
-    15                              <1> DESC_D_32 equ (1b << 22)
-    16                              <1> DESC_L equ (0b << 21)      ; 64位代码标记
-    17                              <1> DESC_AVL equ (0b << 20)        ; CPU未使用
-    18                              <1> DESC_LIMIT_CODE2 equ (0xf << 16)
-    19                              <1> DESC_LIMIT_DATA2 equ (0xf << 16)
-    20                              <1> DESC_LIMIT_VIDEO2 equ (0x0 << 16)
-    21                              <1> DESC_P equ (1b << 15)
-    22                              <1> DESC_DPL_0 equ (0x0 << 13)
-    23                              <1> DESC_DPL_1 equ (0x1 << 13)
-    24                              <1> DESC_DPL_2 equ (0x2 << 13)
-    25                              <1> DESC_DPL_3 equ (0x3 << 13)
-    26                              <1> DESC_S_CODE equ (1b << 12)
-    27                              <1> DESC_S_DATA equ (1b << 12)
-    28                              <1> DESC_S_SYS equ (0b << 12)
-    29                              <1> DESC_TYPE_CODE equ (0x8 << 8)
-    30                              <1> DESC_TYPE_DATA equ (0x2 << 8)
-    31                              <1> 
-    32                              <1> DESC_CODE_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_CODE2 | DESC_P | DESC_DPL_0 | DESC_S_CODE | DESC_TYPE_CODE | 0x00)
-    33                              <1> DESC_DATA_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_DATA2 | DESC_P | DESC_DPL_0 | DESC_S_DATA | DESC_TYPE_DATA | 0x00)
-    34                              <1> DESC_VIDEO_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_VIDEO2 | DESC_P | DESC_DPL_0 | DESC_S_DATA | DESC_TYPE_DATA | 0x0b)
-    35                              <1> 
-    36                              <1> ;----------段选择子属性----------
-    37                              <1> RPL0 equ 00b
-    38                              <1> RPL1 equ 01b
-    39                              <1> RPL2 equ 10b
-    40                              <1> RPL3 equ 11b
-    41                              <1> TI_GDT equ (0b << 2)
-    42                              <1> TI_LDT equ (1b << 2)
-    43                              <1> 
-    44                              <1> ;----------页表项属性----------
-    45                              <1> PG_P equ 1b
-    46                              <1> PG_RW_R equ (0b << 1)
-    47                              <1> PG_RW_W equ (1b << 1)
-    48                              <1> PG_US_S equ (0b << 2)
-    49                              <1> PG_US_U equ (1b << 2)
+     4                              <1> LOADER_ENTRY equ LOADER_BASE_ADDR + 0x300
+     5                              <1> LOADER_START_SECTOR equ 0x2
+     6                              <1> 
+     7                              <1> PAGE_DIR_TABLE_POS equ 0x100000
+     8                              <1> 
+     9                              <1> ;----------kernel----------
+    10                              <1> KERNEL_BIN_BASE_ADDR equ 0x70000
+    11                              <1> KERNEL_ENTRY_POINT equ 0xc0001500
+    12                              <1> KERNEL_START_SECTOR equ 0x9
+    13                              <1> 
+    14                              <1> ;----------gtd描述符属性----------
+    15                              <1> DESC_G_4K equ (1b << 23)
+    16                              <1> DESC_D_32 equ (1b << 22)
+    17                              <1> DESC_L equ (0b << 21)      ; 64位代码标记
+    18                              <1> DESC_AVL equ (0b << 20)        ; CPU未使用
+    19                              <1> DESC_LIMIT_CODE2 equ (0xf << 16)
+    20                              <1> DESC_LIMIT_DATA2 equ (0xf << 16)
+    21                              <1> DESC_LIMIT_VIDEO2 equ (0x0 << 16)
+    22                              <1> DESC_P equ (1b << 15)
+    23                              <1> DESC_DPL_0 equ (0x0 << 13)
+    24                              <1> DESC_DPL_1 equ (0x1 << 13)
+    25                              <1> DESC_DPL_2 equ (0x2 << 13)
+    26                              <1> DESC_DPL_3 equ (0x3 << 13)
+    27                              <1> DESC_S_CODE equ (1b << 12)
+    28                              <1> DESC_S_DATA equ (1b << 12)
+    29                              <1> DESC_S_SYS equ (0b << 12)
+    30                              <1> DESC_TYPE_CODE equ (0x8 << 8)
+    31                              <1> DESC_TYPE_DATA equ (0x2 << 8)
+    32                              <1> 
+    33                              <1> DESC_CODE_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_CODE2 | DESC_P | DESC_DPL_0 | DESC_S_CODE | DESC_TYPE_CODE | 0x00)
+    34                              <1> DESC_DATA_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_DATA2 | DESC_P | DESC_DPL_0 | DESC_S_DATA | DESC_TYPE_DATA | 0x00)
+    35                              <1> DESC_VIDEO_HIGH4 equ ((0x00 << 24) | DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_LIMIT_VIDEO2 | DESC_P | DESC_DPL_0 | DESC_S_DATA | DESC_TYPE_DATA | 0x0b)
+    36                              <1> 
+    37                              <1> ;----------段选择子属性----------
+    38                              <1> RPL0 equ 00b
+    39                              <1> RPL1 equ 01b
+    40                              <1> RPL2 equ 10b
+    41                              <1> RPL3 equ 11b
+    42                              <1> TI_GDT equ (0b << 2)
+    43                              <1> TI_LDT equ (1b << 2)
+    44                              <1> 
+    45                              <1> ;----------页表项属性----------
+    46                              <1> PG_P equ 1b
+    47                              <1> PG_RW_R equ (0b << 1)
+    48                              <1> PG_RW_W equ (1b << 1)
+    49                              <1> PG_US_S equ (0b << 2)
+    50                              <1> PG_US_U equ (1b << 2)
      2                                  
      3                                  SECTION MBR vstart=0x7c00
      4                                  ; 0000:7c00
@@ -73,7 +74,7 @@
     25 00000029 B90400                      mov cx, 4
     26 0000002C E80300                      call RdDiskM16
     27                                  
-    28 0000002F E9(0009)                    jmp LOADER_BASE_ADDR     ; 跳转到Loader起始地址
+    28 0000002F E9(000C)                    jmp LOADER_ENTRY     ; 跳转到Loader入口点
     29                                  
     30                                  
     31                                  

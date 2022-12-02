@@ -8,10 +8,9 @@ SELECTOR_DATA equ (0x0002 << 3) | TI_GDT | RPL0
 SELECTOR_VIDEO equ (0x0003 << 3) | TI_GDT | RPL0
 
 
-    jmp loaderStart
+; Loader data: 0x900
 
 ; GDT，全局描述符表
-
 GDT_BASE:
     dd 0x00000000
     dd 0x00000000
@@ -49,7 +48,7 @@ GDT_LIMIT equ GDT_SIZE - 1
 
 
 
-; Loader
+; Loader code: 0x900+0x300
 loaderStart:
 
     xor ebx, ebx

@@ -4,6 +4,7 @@
         "print.h": "c",
         "interrupt.h": "c",
         "global.h": "c",
-        "debug.h": "c"
+        "debug.h": "c",
+        "memory.h": "c"
     }
 }

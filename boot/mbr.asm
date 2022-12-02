@@ -25,7 +25,7 @@ SECTION MBR vstart=0x7c00
     mov cx, 4
     call RdDiskM16
 
-    jmp LOADER_BASE_ADDR     ; 跳转到Loader起始地址
+    jmp LOADER_ENTRY     ; 跳转到Loader入口点
 
 
 

@@ -74,7 +74,6 @@ char* strrchr(const char* str, const uint8 ch) {
     return (char*)lastChar;
 }
 
-
 char* strcat(char* dst_, const char* src_) {
     ASSERT(dst_ != NULL && src_ != NULL);
     char* str = dst_;
@@ -84,7 +83,7 @@ char* strcat(char* dst_, const char* src_) {
     return dst_;
 }
 
-uint32 strchr(const char* str, uint8 ch) {
+uint32 strchrs(const char* str, uint8 ch) {
     ASSERT(str != NULL);
     uint32 chCnt = 0;
     const char* p = str;
