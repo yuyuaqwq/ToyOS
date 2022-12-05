@@ -12,10 +12,10 @@ typedef struct _ListElem {
     struct _LISTElem* next;
 } ListElem;
 
-typedef struct List {
+typedef struct _List {
     ListElem head;
     ListElem tail;
-};
+} List;
 
 typedef bool (function)(ListElem*, int arg);
 
