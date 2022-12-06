@@ -53,6 +53,13 @@ static void PicInit(void) {
 
 static GateDesc gIdt[IDT_DESC_CNT];
 extern IntrHandler gIntrEntryTable[IDT_DESC_CNT];
+
+
+char* gIntrName[IDT_DESC_CNT];
+IntrHandler gIdtTable[IDT_DESC_CNT];
+extern IntrHandler gIntrEntryTable[IDT_DESC_CNT];
+
+
 static void MakeIdtDesc(GateDesc* pGDesc, uint8 attr, IntrHandler function) {
     pGDesc->funcOffsetLowWord = (uint32)function & 0x0000ffff;
     pGDesc->selector = SELECTOR_K_CODE;
@@ -77,12 +84,29 @@ static void GeneralIntrHandler(uint8 vecNr) {
         // IRQ7 和 IRQ15会产生伪中断，无需处理
         return;
     }
-    PutStr("int vector : 0x"); PutInt(vecNr); PutChar('\n');
+
+    SetCursor(0);
+    int cursorPos = 0;
+    while(cursorPos < 320) {
+        PutChar(' ');
+        cursorPos++;
+    }
+
+    SetCursor(0);
+    PutStr("!!!!!!      exception message begin      !!!!!!\n");
+    SetCursor(((2 - 1) * 80) + 8);
+    PutStr("0x"); PutInt(vecNr); PutChar(' ');
+    PutStr(gIntrName[vecNr]);
+    if (vecNr == 14) {
+        int pageFaultVAddr = 0;
+        asm ("movl %%cr2, %0" : "=r"(pageFaultVAddr));
+        PutStr("\npage fault addr is "); PutInt(pageFaultVAddr);
+    }
+
+    while(1);
 }
 
-char* gIntrName[IDT_DESC_CNT];
-IntrHandler gIdtTable[IDT_DESC_CNT];
-extern IntrHandler gIntrEntryTable[IDT_DESC_CNT];
+
 static void ExceptionInit(void) {
     for (int i = 0; i < IDT_DESC_CNT; i++) {
         gIdtTable[i] = GeneralIntrHandler;      // 默认为通用中断处理例程
@@ -110,17 +134,6 @@ static void ExceptionInit(void) {
     gIntrName[19] = "#XF SIMD Floating-Point Exception";
 }
 
-void IdtInit(void) {
-    PutStr("IdtInit Start\n");
-    IdtDescInit();      // 初始化中断描述符
-    ExceptionInit();        // 初始化异常处理机制
-    PicInit();      // 初始化8259A
-
-    // 加载Idt
-    uint64 idtOperand = ((sizeof(gIdt) - 1) | ((uint64)(uint32)gIdt << 16));
-    asm volatile("lidt %0" : : "m"(idtOperand));
-    PutStr("IdtInit done\n");
-}
 
 
 #define EFLAGS_IF 0x00000200
@@ -173,4 +186,25 @@ IntrStatus IntrGetStatus(void) {
     uint32 eflags = 0;
     GET_EFLAGS(eflags);
     return (EFLAGS_IF & eflags) ? kIntrOn : kIntrOff;
+}
+
+
+/* 
+* 注册指定中断向量号的处理例程
+*/
+void IntrRegisterHandler(uint8 vectorNo, IntrHandler function) {
+    gIdtTable[vectorNo] = function;
+}
+
+
+void IdtInit(void) {
+    PutStr("IdtInit Start\n");
+    IdtDescInit();      // 初始化中断描述符
+    ExceptionInit();        // 初始化异常处理机制
+    PicInit();      // 初始化8259A
+
+    // 加载Idt
+    uint64 idtOperand = ((sizeof(gIdt) - 1) | ((uint64)(uint32)gIdt << 16));
+    asm volatile("lidt %0" : : "m"(idtOperand));
+    PutStr("IdtInit done\n");
 }

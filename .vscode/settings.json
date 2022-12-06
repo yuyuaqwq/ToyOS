@@ -5,6 +5,8 @@
         "interrupt.h": "c",
         "global.h": "c",
         "debug.h": "c",
-        "memory.h": "c"
+        "memory.h": "c",
+        "timer.h": "c",
+        "thread.h": "c"
     }
 }

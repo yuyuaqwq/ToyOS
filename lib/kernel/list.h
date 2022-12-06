@@ -4,14 +4,20 @@
 #include "kernel/global.h"
 #include "lib/stdint.h"
 
-#define offset(structType, member)
-#define elem2entry(structType, structMemberName, elemPtr) (structType*)((int)elemPtr - offset(structType, structMemberName))
+#define Offset(structType, member) (int)(&((structType*)0)->member)
+#define Elem2Entry(structType, structMemberName, pElemPtr) (structType*)((int)pElemPtr - Offset(structType, structMemberName))
 
+/*
+* 节点
+*/
 typedef struct _ListElem {
     struct _ListElem* prev;
-    struct _LISTElem* next;
+    struct _ListElem* next;
 } ListElem;
 
+/*
+* 链表
+*/
 typedef struct _List {
     ListElem head;
     ListElem tail;
@@ -20,15 +26,19 @@ typedef struct _List {
 typedef bool (function)(ListElem*, int arg);
 
 void ListInit(List*);
-void ListInsertBefore(ListElem* before, ListElem* elem);
-void ListPush(List* pList, ListElem* elem);
+void ListInsertBefore(ListElem* before, ListElem* pElem);
+void ListPush(List* pList, ListElem* pElem);
 void ListIterate(List* pList);
-void ListAppend(List* pList, ListElem* elem);
+void ListAppend(List* pList, ListElem* pElem);
 void ListRemove(ListElem* pElem);
 ListElem* ListPop(List* pList);
 bool ListEmpty(List* pList);
 uint32 ListLen(List* pList);
 ListElem* ListTraversal(List* pList, function func, int arg);
 bool ElemFind(List* pList, ListElem* objElem);
+
+
+void ElemPrint(ListElem* pElem, const char* info);
+void ListPrint(List* pList, const char* info);
 
 #endif // LIB_KERNEL_LIST_H_

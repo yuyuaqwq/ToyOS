@@ -1,0 +1,26 @@
+     1                                  [bits 32]
+     2                                  section .text
+     3                                  
+     4                                  ; 切换线程(即切换栈)
+     5                                  global _SwitchTo
+     6                                  _SwitchTo:
+     7                                      ; 将必要寄存器备份到当前线程的栈中
+     8 00000000 56                          push esi
+     9 00000001 57                          push edi
+    10 00000002 53                          push ebx
+    11 00000003 55                          push ebp
+    12                                  
+    13                                      ; 当前栈顶指针保存到TaskStruct.selfKStack
+    14 00000004 8B442414                    mov eax, [esp + 20]
+    15 00000008 8920                        mov [eax], esp
+    16                                  
+    17                                      ; 得到next
+    18 0000000A 8B442418                    mov eax, [esp + 24]
+    19                                      ; selfKStack，切换栈
+    20 0000000E 8B20                        mov esp, [eax]
+    21                                  
+    22 00000010 5D                          pop ebp
+    23 00000011 5B                          pop ebx
+    24 00000012 5F                          pop edi
+    25 00000013 5E                          pop esi
+    26 00000014 C3                          ret

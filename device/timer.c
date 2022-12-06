@@ -1,5 +1,10 @@
 #include "timer.h"
 
+#include "kernel/debug.h"
+#include "kernel/interrupt.h"
+#include "thread/thread.h"
+
+
 #include "lib/kernel/io.h"
 #include "lib/kernel/print.h"
 
@@ -18,8 +23,25 @@ static void FrequencySet(uint8 counterPort, uint8 counterNo, uint8 rwl, uint8 co
     outb(counterPort, (uint8)(counterValue >> 8));
 }
 
+uint32 gTicks;
+static void IntrTimerHandler(void) {
+    TaskStruct* curThread = RunningThread();
+    ASSERT(curThread->stackMagic = 'THRE');
+
+    curThread->elapsedTicks++;
+    gTicks++;
+
+    if (curThread->ticks == 0) {
+        Schedule();
+    } else {
+        curThread->ticks--;
+    }
+}
+
+
 void TimerInit(void) {
     PutStr("TimerInit start\n");
     FrequencySet(COUNTER0_PORT, COUNTER0_NO, READ_WRITE_LATCH, COUNTER_MODE, COUNTER0_VALUE);
+    IntrRegisterHandler(0x20, IntrTimerHandler);
     PutStr("TimerInit done\n");
 }

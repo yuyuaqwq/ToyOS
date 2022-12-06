@@ -4,4 +4,5 @@
 void PutChar(uint8 charAscii);
 void PutStr(uint8* message);
 void PutInt(uint32 num);
+void SetCursor(uint32 cursorPos);
 #endif // LIB_KERNEL_PRINT_H_

@@ -18,4 +18,6 @@ IntrStatus IntrSetStatus(IntrStatus status);
 IntrStatus IntrEnable(void);
 IntrStatus IntrDisable(void);
 
+void IntrRegisterHandler(uint8 vectorNo, IntrHandler function);
+
 #endif // KERNEL_INTERRUPT_H_

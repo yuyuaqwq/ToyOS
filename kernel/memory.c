@@ -195,7 +195,7 @@ void* MallocPage(PoolFlags pf, uint32 pgCnt) {
 
 
 /*
-* 从内核物理内存池申请1页内存
+* 从内核物理内存池申请连续虚拟页面
 * 成功返回虚拟地址，失败返回NULL
 */
 void* GetKernelPages(uint32 pgCnt) {

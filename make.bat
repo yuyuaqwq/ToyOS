@@ -2,11 +2,33 @@
 #.\make.bat
 #cd ..
 
-cd .\kernel
+cd .\build
+del *.o
+del *.bin
+del *.lst
+cd ..
+
+cd .\boot
+call .\make.bat
+cd ..
+
+cd .\lib
 call .\make.bat
 cd ..
 
 cd .\thread
+call .\make.bat
+cd ..
+
+cd .\device
+call .\make.bat
+cd ..
+
+cd .\lib
+call .\make.bat
+cd ..
+
+cd .\kernel
 call .\make.bat
 cd ..
 

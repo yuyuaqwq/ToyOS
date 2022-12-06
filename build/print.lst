@@ -215,3 +215,26 @@
    215                                  .putCharDone:
    216 0000015A 61                          popad
    217 0000015B C3                          ret
+   218                                  
+   219                                  
+   220                                  global _SetCursor:
+   221                                  _SetCursor:
+   222 0000015C 60                         pushad
+   223 0000015D 668B5C2424                 mov bx, [esp+36]
+   224                                  
+   225 00000162 66BAD403                   mov dx, 0x03d4
+   226 00000166 B00E                       mov al, 0x0e
+   227 00000168 EE                         out dx, al
+   228 00000169 66BAD503                   mov dx, 0x03d5
+   229 0000016D 88F8                       mov al, bh
+   230 0000016F EE                         out dx, al
+   231                                  
+   232                                  ;;;;;;; 2 再设置低8位 ;;;;;;;;;
+   233 00000170 66BAD403                   mov dx, 0x03d4
+   234 00000174 B00F                       mov al, 0x0f
+   235 00000176 EE                         out dx, al
+   236 00000177 66BAD503                   mov dx, 0x03d5 
+   237 0000017B 88D8                       mov al, bl
+   238 0000017D EE                         out dx, al
+   239 0000017E 61                         popad
+   240 0000017F C3                         ret
