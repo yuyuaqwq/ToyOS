@@ -18,4 +18,18 @@ typedef struct _Lock {
 } Lock;
 
 
+
+#include "sync.h"
+
+#include "kernel/interrupt.h"
+
+
+void SemaInit(Semaphore* pSema, uint8 value);
+void SemaDown(Semaphore* pSema);
+void SemaUp(Semaphore* pSema);
+
+void LockInit(Lock* pLock);
+void LockAcquire(Lock* pLock);
+void LockRelease(Lock* pLock);
+
 #endif // THREAD_SYNC_H_

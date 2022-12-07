@@ -815,7 +815,7 @@
     32                              <1> section .data
     33 0000007C [5B030000]          <1>  dd intr%1Entry
     34                              <1> 
-    82                                  VECTOR 0x20, ZERO
+    82                                  VECTOR 0x20, ZERO       ; 时钟中断对应入口
     12                              <1> section .text
     13                              <1> 
     14                              <1> intr%1Entry:
@@ -838,4 +838,364 @@
     31                              <1> 
     32                              <1> section .data
     33 00000080 [77030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    83                                  VECTOR 0x21, ZERO       ; 键盘中断对应入口
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000393 6A00                <1>  %2
+    17 00000395 1E                  <1>  push ds
+    18 00000396 06                  <1>  push es
+    19 00000397 0FA0                <1>  push fs
+    20 00000399 0FA8                <1>  push gs
+    21 0000039B 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000039C B020                <1>  mov al, 0x20
+    25 0000039E E6A0                <1>  out 0xa0, al
+    26 000003A0 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000003A2 6A21                <1>  push %1
+    29 000003A4 FF15[84000000]      <1>  call [_gIdtTable + %1*4]
+    30 000003AA E951FCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000084 [93030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    84                                  VECTOR 0x22, ZERO       ; 级联
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000003AF 6A00                <1>  %2
+    17 000003B1 1E                  <1>  push ds
+    18 000003B2 06                  <1>  push es
+    19 000003B3 0FA0                <1>  push fs
+    20 000003B5 0FA8                <1>  push gs
+    21 000003B7 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000003B8 B020                <1>  mov al, 0x20
+    25 000003BA E6A0                <1>  out 0xa0, al
+    26 000003BC E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000003BE 6A22                <1>  push %1
+    29 000003C0 FF15[88000000]      <1>  call [_gIdtTable + %1*4]
+    30 000003C6 E935FCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000088 [AF030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    85                                  VECTOR 0x23, ZERO       ; 串口2对应入口
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000003CB 6A00                <1>  %2
+    17 000003CD 1E                  <1>  push ds
+    18 000003CE 06                  <1>  push es
+    19 000003CF 0FA0                <1>  push fs
+    20 000003D1 0FA8                <1>  push gs
+    21 000003D3 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000003D4 B020                <1>  mov al, 0x20
+    25 000003D6 E6A0                <1>  out 0xa0, al
+    26 000003D8 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000003DA 6A23                <1>  push %1
+    29 000003DC FF15[8C000000]      <1>  call [_gIdtTable + %1*4]
+    30 000003E2 E919FCFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000008C [CB030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    86                                  VECTOR 0x24, ZERO       ; 串口1对应入口
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000003E7 6A00                <1>  %2
+    17 000003E9 1E                  <1>  push ds
+    18 000003EA 06                  <1>  push es
+    19 000003EB 0FA0                <1>  push fs
+    20 000003ED 0FA8                <1>  push gs
+    21 000003EF 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000003F0 B020                <1>  mov al, 0x20
+    25 000003F2 E6A0                <1>  out 0xa0, al
+    26 000003F4 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000003F6 6A24                <1>  push %1
+    29 000003F8 FF15[90000000]      <1>  call [_gIdtTable + %1*4]
+    30 000003FE E9FDFBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000090 [E7030000]          <1>  dd intr%1Entry
+    34                              <1> 
+    87                                  VECTOR 0x25, ZERO       ; 并口2对应入口
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000403 6A00                <1>  %2
+    17 00000405 1E                  <1>  push ds
+    18 00000406 06                  <1>  push es
+    19 00000407 0FA0                <1>  push fs
+    20 00000409 0FA8                <1>  push gs
+    21 0000040B 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000040C B020                <1>  mov al, 0x20
+    25 0000040E E6A0                <1>  out 0xa0, al
+    26 00000410 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000412 6A25                <1>  push %1
+    29 00000414 FF15[94000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000041A E9E1FBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000094 [03040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    88                                  VECTOR 0x26, ZERO       ; 软盘对应入口
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000041F 6A00                <1>  %2
+    17 00000421 1E                  <1>  push ds
+    18 00000422 06                  <1>  push es
+    19 00000423 0FA0                <1>  push fs
+    20 00000425 0FA8                <1>  push gs
+    21 00000427 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000428 B020                <1>  mov al, 0x20
+    25 0000042A E6A0                <1>  out 0xa0, al
+    26 0000042C E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000042E 6A26                <1>  push %1
+    29 00000430 FF15[98000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000436 E9C5FBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 00000098 [1F040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    89                                  VECTOR 0x27, ZERO       ; 并口1对应入口
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000043B 6A00                <1>  %2
+    17 0000043D 1E                  <1>  push ds
+    18 0000043E 06                  <1>  push es
+    19 0000043F 0FA0                <1>  push fs
+    20 00000441 0FA8                <1>  push gs
+    21 00000443 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000444 B020                <1>  mov al, 0x20
+    25 00000446 E6A0                <1>  out 0xa0, al
+    26 00000448 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000044A 6A27                <1>  push %1
+    29 0000044C FF15[9C000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000452 E9A9FBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 0000009C [3B040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    90                                  VECTOR 0x28, ZERO       ; 实时时钟对应入口
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000457 6A00                <1>  %2
+    17 00000459 1E                  <1>  push ds
+    18 0000045A 06                  <1>  push es
+    19 0000045B 0FA0                <1>  push fs
+    20 0000045D 0FA8                <1>  push gs
+    21 0000045F 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000460 B020                <1>  mov al, 0x20
+    25 00000462 E6A0                <1>  out 0xa0, al
+    26 00000464 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000466 6A28                <1>  push %1
+    29 00000468 FF15[A0000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000046E E98DFBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000A0 [57040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    91                                  VECTOR 0x29, ZERO       ; 重定向
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 00000473 6A00                <1>  %2
+    17 00000475 1E                  <1>  push ds
+    18 00000476 06                  <1>  push es
+    19 00000477 0FA0                <1>  push fs
+    20 00000479 0FA8                <1>  push gs
+    21 0000047B 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 0000047C B020                <1>  mov al, 0x20
+    25 0000047E E6A0                <1>  out 0xa0, al
+    26 00000480 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 00000482 6A29                <1>  push %1
+    29 00000484 FF15[A4000000]      <1>  call [_gIdtTable + %1*4]
+    30 0000048A E971FBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000A4 [73040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    92                                  VECTOR 0x2a, ZERO       ; 保留
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000048F 6A00                <1>  %2
+    17 00000491 1E                  <1>  push ds
+    18 00000492 06                  <1>  push es
+    19 00000493 0FA0                <1>  push fs
+    20 00000495 0FA8                <1>  push gs
+    21 00000497 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000498 B020                <1>  mov al, 0x20
+    25 0000049A E6A0                <1>  out 0xa0, al
+    26 0000049C E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000049E 6A2A                <1>  push %1
+    29 000004A0 FF15[A8000000]      <1>  call [_gIdtTable + %1*4]
+    30 000004A6 E955FBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000A8 [8F040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    93                                  VECTOR 0x2b, ZERO       ; 保留
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000004AB 6A00                <1>  %2
+    17 000004AD 1E                  <1>  push ds
+    18 000004AE 06                  <1>  push es
+    19 000004AF 0FA0                <1>  push fs
+    20 000004B1 0FA8                <1>  push gs
+    21 000004B3 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000004B4 B020                <1>  mov al, 0x20
+    25 000004B6 E6A0                <1>  out 0xa0, al
+    26 000004B8 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000004BA 6A2B                <1>  push %1
+    29 000004BC FF15[AC000000]      <1>  call [_gIdtTable + %1*4]
+    30 000004C2 E939FBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000AC [AB040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    94                                  VECTOR 0x2c, ZERO       ; ps/2 鼠标
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000004C7 6A00                <1>  %2
+    17 000004C9 1E                  <1>  push ds
+    18 000004CA 06                  <1>  push es
+    19 000004CB 0FA0                <1>  push fs
+    20 000004CD 0FA8                <1>  push gs
+    21 000004CF 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000004D0 B020                <1>  mov al, 0x20
+    25 000004D2 E6A0                <1>  out 0xa0, al
+    26 000004D4 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000004D6 6A2C                <1>  push %1
+    29 000004D8 FF15[B0000000]      <1>  call [_gIdtTable + %1*4]
+    30 000004DE E91DFBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000B0 [C7040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    95                                  VECTOR 0x2d, ZERO       ; FPU浮点单元异常
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000004E3 6A00                <1>  %2
+    17 000004E5 1E                  <1>  push ds
+    18 000004E6 06                  <1>  push es
+    19 000004E7 0FA0                <1>  push fs
+    20 000004E9 0FA8                <1>  push gs
+    21 000004EB 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 000004EC B020                <1>  mov al, 0x20
+    25 000004EE E6A0                <1>  out 0xa0, al
+    26 000004F0 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 000004F2 6A2D                <1>  push %1
+    29 000004F4 FF15[B4000000]      <1>  call [_gIdtTable + %1*4]
+    30 000004FA E901FBFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000B4 [E3040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    96                                  VECTOR 0x2e, ZERO       ; 硬盘
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 000004FF 6A00                <1>  %2
+    17 00000501 1E                  <1>  push ds
+    18 00000502 06                  <1>  push es
+    19 00000503 0FA0                <1>  push fs
+    20 00000505 0FA8                <1>  push gs
+    21 00000507 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000508 B020                <1>  mov al, 0x20
+    25 0000050A E6A0                <1>  out 0xa0, al
+    26 0000050C E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000050E 6A2E                <1>  push %1
+    29 00000510 FF15[B8000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000516 E9E5FAFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000B8 [FF040000]          <1>  dd intr%1Entry
+    34                              <1> 
+    97                                  VECTOR 0x2f, ZERO       ; 保留
+    12                              <1> section .text
+    13                              <1> 
+    14                              <1> intr%1Entry:
+    15                              <1> 
+    16 0000051B 6A00                <1>  %2
+    17 0000051D 1E                  <1>  push ds
+    18 0000051E 06                  <1>  push es
+    19 0000051F 0FA0                <1>  push fs
+    20 00000521 0FA8                <1>  push gs
+    21 00000523 60                  <1>  pushad
+    22                              <1> 
+    23                              <1> 
+    24 00000524 B020                <1>  mov al, 0x20
+    25 00000526 E6A0                <1>  out 0xa0, al
+    26 00000528 E620                <1>  out 0x20, al
+    27                              <1> 
+    28 0000052A 6A2F                <1>  push %1
+    29 0000052C FF15[BC000000]      <1>  call [_gIdtTable + %1*4]
+    30 00000532 E9C9FAFFFF          <1>  jmp IntrExit
+    31                              <1> 
+    32                              <1> section .data
+    33 000000BC [1B050000]          <1>  dd intr%1Entry
     34                              <1> 

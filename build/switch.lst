@@ -10,17 +10,16 @@
     10 00000002 53                          push ebx
     11 00000003 55                          push ebp
     12                                  
-    13                                      ; 当前栈顶指针保存到TaskStruct.selfKStack
-    14 00000004 8B442414                    mov eax, [esp + 20]
-    15 00000008 8920                        mov [eax], esp
+    13                                      
+    14 00000004 8B442414                    mov eax, [esp + 20]     ; 第一个参数，cur
+    15 00000008 8920                        mov [eax], esp      ; cur.selfKStack = esp
     16                                  
     17                                      ; 得到next
-    18 0000000A 8B442418                    mov eax, [esp + 24]
-    19                                      ; selfKStack，切换栈
-    20 0000000E 8B20                        mov esp, [eax]
-    21                                  
-    22 00000010 5D                          pop ebp
-    23 00000011 5B                          pop ebx
-    24 00000012 5F                          pop edi
-    25 00000013 5E                          pop esi
-    26 00000014 C3                          ret
+    18 0000000A 8B442418                    mov eax, [esp + 24]     ; 第二个参数，next
+    19 0000000E 8B20                        mov esp, [eax]      ; esp = next.selfKStack，至此完成栈切换，即线程切换
+    20                                  
+    21 00000010 5D                          pop ebp
+    22 00000011 5B                          pop ebx
+    23 00000012 5F                          pop edi
+    24 00000013 5E                          pop esi
+    25 00000014 C3                          ret

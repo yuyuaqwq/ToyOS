@@ -13,6 +13,7 @@ typedef enum _IntrStatus {
     kIntrOff,       // 关闭
     kIntrOn,        // 开启
 } IntrStatus;
+
 IntrStatus IntrGetStatus(void);
 IntrStatus IntrSetStatus(IntrStatus status);
 IntrStatus IntrEnable(void);

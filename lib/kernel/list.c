@@ -80,10 +80,13 @@ bool ElemFind(List* pList, ListElem* pElem) {
 }
 
 void ElemPrint(ListElem* pElem, const char* info) {
+    IntrStatus oldStatus = IntrDisable();
     PutStr("elem."); PutStr(info); PutStr(" 0x"); PutInt(pElem); PutChar(' ');
+    IntrSetStatus(oldStatus);
 }
 
 void ListPrint(List* pList, const char* info) {
+    IntrStatus oldStatus = IntrDisable();
     PutStr("list."); PutStr(info); PutStr(" beg"); PutChar(' ');
     PutStr("head:0x"); PutInt(&pList->head); PutChar(' ');
     PutStr("tail:0x"); PutInt(&pList->tail); PutChar('\n');
@@ -93,6 +96,7 @@ void ListPrint(List* pList, const char* info) {
         pElem_ = pElem_->next;
     }
     PutStr("list end"); PutChar('\n');
+    IntrSetStatus(oldStatus);
 }
 
 /*

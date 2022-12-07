@@ -5,18 +5,7 @@
 #include "lib/kernel/io.h"
 #include "kernel/global.h"
 
-#define IDT_DESC_CNT 0x21
 
-// 中断门描述符结构体
-typedef struct _GateDesc {
-    uint16 funcOffsetLowWord;
-    uint16 selector;
-    uint8 dCount;
-
-    uint8 attribute;
-    uint16 funcOffsetHighWord;
-} GateDesc;
- 
 
 #define PIC_M_CTRL 0x20
 #define PIC_M_DATA 0x21
@@ -24,7 +13,7 @@ typedef struct _GateDesc {
 #define PIC_S_DATA 0xa1
 
 /* 
-* 初始化可编程中断控制器
+* 初始化8259A可编程中断控制器
 */
 static void PicInit(void) {
     // 初始化主片
@@ -42,8 +31,8 @@ static void PicInit(void) {
     outb(PIC_S_DATA, 0x01);
 
 
-    // 打开主片上IR0，只支持时钟产生的中断
-    outb(PIC_M_DATA, 0xfe);
+    // 打开主片上IR0，只打开时钟和键盘产生的中断
+    outb(PIC_M_DATA, 0xfc);
     outb(PIC_S_DATA, 0xff);
 
     PutStr("    PicInit done\n");
@@ -51,6 +40,19 @@ static void PicInit(void) {
 }
 
 
+
+#define IDT_DESC_CNT 0x30
+
+// 中断门描述符结构体
+typedef struct _GateDesc {
+    uint16 funcOffsetLowWord;
+    uint16 selector;
+    uint8 dCount;
+
+    uint8 attribute;
+    uint16 funcOffsetHighWord;
+} GateDesc;
+ 
 static GateDesc gIdt[IDT_DESC_CNT];
 extern IntrHandler gIntrEntryTable[IDT_DESC_CNT];
 
@@ -60,6 +62,9 @@ IntrHandler gIdtTable[IDT_DESC_CNT];
 extern IntrHandler gIntrEntryTable[IDT_DESC_CNT];
 
 
+/* 
+* 构建中断描述符
+*/
 static void MakeIdtDesc(GateDesc* pGDesc, uint8 attr, IntrHandler function) {
     pGDesc->funcOffsetLowWord = (uint32)function & 0x0000ffff;
     pGDesc->selector = SELECTOR_K_CODE;
@@ -68,6 +73,9 @@ static void MakeIdtDesc(GateDesc* pGDesc, uint8 attr, IntrHandler function) {
     pGDesc->funcOffsetHighWord = ((uint32)function & 0xffff0000) >> 16;
 }
 
+/* 
+* 中断描述符初始化
+*/
 static void IdtDescInit(void) {
     for (int i = 0; i < IDT_DESC_CNT; i++) {
         MakeIdtDesc(&gIdt[i], IDT_DESC_ATTR_DPL0, gIntrEntryTable[i]);
@@ -106,10 +114,12 @@ static void GeneralIntrHandler(uint8 vecNr) {
     while(1);
 }
 
-
+/* 
+* 初始化异常机制
+*/
 static void ExceptionInit(void) {
     for (int i = 0; i < IDT_DESC_CNT; i++) {
-        gIdtTable[i] = GeneralIntrHandler;      // 默认为通用中断处理例程
+        gIdtTable[i] = GeneralIntrHandler;      // 所有异常处理例程默认为通用中断处理例程
         gIntrName[i] = "unknown";
     }
     gIntrName[0] = "#DE Divide Error";
@@ -132,6 +142,29 @@ static void ExceptionInit(void) {
     gIntrName[17] = "#AC Alignment Check Exception";
     gIntrName[18] = "#MC Machine-Check Exception";
     gIntrName[19] = "#XF SIMD Floating-Point Exception";
+}
+
+
+/* 
+* 注册指定中断向量号的处理例程
+*/
+void IntrRegisterHandler(uint8 vectorNo, IntrHandler function) {
+    gIdtTable[vectorNo] = function;
+}
+
+/* 
+* 初始化中断机制
+*/
+void IdtInit(void) {
+    PutStr("IdtInit Start\n");
+    IdtDescInit();      // 初始化中断描述符
+    ExceptionInit();        // 初始化异常处理机制
+    PicInit();      // 初始化8259A
+
+    // 加载Idt
+    uint64 idtOperand = ((sizeof(gIdt) - 1) | ((uint64)(uint32)gIdt << 16));
+    asm volatile("lidt %0" : : "m"(idtOperand));
+    PutStr("IdtInit done\n");
 }
 
 
@@ -188,23 +221,3 @@ IntrStatus IntrGetStatus(void) {
     return (EFLAGS_IF & eflags) ? kIntrOn : kIntrOff;
 }
 
-
-/* 
-* 注册指定中断向量号的处理例程
-*/
-void IntrRegisterHandler(uint8 vectorNo, IntrHandler function) {
-    gIdtTable[vectorNo] = function;
-}
-
-
-void IdtInit(void) {
-    PutStr("IdtInit Start\n");
-    IdtDescInit();      // 初始化中断描述符
-    ExceptionInit();        // 初始化异常处理机制
-    PicInit();      // 初始化8259A
-
-    // 加载Idt
-    uint64 idtOperand = ((sizeof(gIdt) - 1) | ((uint64)(uint32)gIdt << 16));
-    asm volatile("lidt %0" : : "m"(idtOperand));
-    PutStr("IdtInit done\n");
-}

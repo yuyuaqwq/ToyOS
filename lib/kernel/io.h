@@ -14,7 +14,7 @@ static inline void outsw(uint16 port, const void* addr, uint32 wordCnt) {
 
 static inline uint8 inb(uint16 port) {
     uint8 data;
-    asm volatile("inb %w1 %b0" : "=a"(data) : "Nd"(port));
+    asm volatile("inb %w1, %b0" : "=a"(data) : "Nd"(port));
     return data;
 }
 

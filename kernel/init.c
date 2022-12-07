@@ -4,6 +4,8 @@
 #include "kernel/interrupt.h"
 #include "kernel/memory.h"
 #include "device/timer.h"
+#include "device/console.h"
+#include "device/keyboard.h"
 #include "thread/thread.h"
 
 void InitAll(void) {
@@ -12,4 +14,6 @@ void InitAll(void) {
     MemInit();
     ThreadEnvirInit();
     TimerInit();
+    KeyBoardInit();
+    ConsoleInit();
 }
