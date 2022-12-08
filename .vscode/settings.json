@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "init.h": "c",
+        "print.h": "c",
+        "interrupt.h": "c",
+        "global.h": "c",
+        "debug.h": "c",
+        "memory.h": "c",
+        "timer.h": "c",
+        "thread.h": "c",
+        "sync.h": "c",
+        "console.h": "c",
+        "stdint.h": "c"
+    }
+}
