@@ -5,6 +5,8 @@
 #include "lib/kernel/print.h"
 #include "kernel/interrupt.h"
 
+#include "userprog/process.h"
+
 /*
 * 内核线程初次被调度时执行的中转函数，从SwitchTo返回到此处
 */
@@ -54,6 +56,7 @@ void Schedule(void) {
     gsThreadTag = ListPop(&gThreadReadyList);
     TaskStruct* next = Elem2Entry(TaskStruct, generalTag, gsThreadTag);
     next->status = kTaskRunning;
+    ProcessActivate(next);
     SwitchTo(cur, next);        // 切换线程
 }
 

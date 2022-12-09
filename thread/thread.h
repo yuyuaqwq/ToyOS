@@ -3,6 +3,7 @@
 
 #include "lib/stdint.h"
 #include "lib/kernel/list.h"
+#include "kernel/memory.h"
 
 typedef void ThreadFunc(void*);
 
@@ -78,18 +79,24 @@ typedef struct _TaskStruct {
     ListElem generalTag;        // 在一般线程队列中的节点
     ListElem allListTag;        // 在所有线程队列中的节点
 
-    uint32* pgDir;
+    uint32* pgDir;      // 进程页表虚拟地址
+    VirAddrPool userprogVAddr;      // 用户进程虚拟地址池
     uint32 stackMagic;
 } TaskStruct;
 
 void Schedule(void);
 TaskStruct* RunningThread(void);
+void ThreadInit(TaskStruct* pThread, const char* name, int prio);
+void ThreadCreate(TaskStruct* pThread, ThreadFunc function, void* funcArg);
 TaskStatus* ThreadStart(const char* name, int prio, ThreadFunc function, void* funcArg);
 void ThreadEnvirInit(void);
 
 void ThreadBlock(TaskStatus stat);
 void ThreadUnblock(TaskStruct* pThread);
 
+extern TaskStruct* gMainThread;
+extern List gThreadReadyList;
+extern List gThreadAllList;
 
 
 #endif // THREAD_THREAD_H_

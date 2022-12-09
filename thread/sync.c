@@ -2,6 +2,7 @@
 
 #include "kernel/interrupt.h"
 #include "kernel/debug.h"
+#include "thread/thread.h"
 
 /*
 * 初始化信号量

@@ -7,6 +7,7 @@
 #include "device/console.h"
 #include "device/keyboard.h"
 #include "thread/thread.h"
+#include "userprog/tss.h"
 
 void InitAll(void) {
     PutStr("InitAll\n");
@@ -16,4 +17,5 @@ void InitAll(void) {
     TimerInit();
     KeyBoardInit();
     ConsoleInit();
+    TssInit();
 }

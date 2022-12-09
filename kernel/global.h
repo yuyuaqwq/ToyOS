@@ -1,6 +1,8 @@
 #ifndef KERNEL_GLOBAL_H_
 #define KERNEL_GLOBAL_H_
 
+#include "lib/stdint.h"
+
 /*
 * GDT描述符属性
 */
@@ -74,4 +76,17 @@ typedef struct _GdtDesc {
 #define IDT_DESC_ATTR_DPL0 (IDT_DESC_P | IDT_DESC_DPL0 | IDT_DESC_32_TYPE)
 #define IDT_DESC_ATTR_DPL3 (IDT_DESC_P | IDT_DESC_DPL3 | IDT_DESC_32_TYPE)
 
+
+
+/*
+* EFL寄存器属性
+*/
+#define EFLAGS_MBS (1 << 1)
+#define EFLAGS_IF_1 (1 << 9)
+#define EFLAGS_IF_0 (0 << 9)
+#define EFLAGS_IOPL_3 (3 << 12)
+
+#define EFLAGS_IOPL_0 (0 << 12)
+
+#define DIV_ROUND_UP(X, STEP) ((X + STEP - 1) / (STEP))
 #endif // KERNEL_GLOBAL_H_

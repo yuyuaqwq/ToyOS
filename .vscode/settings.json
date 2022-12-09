@@ -10,6 +10,8 @@
         "thread.h": "c",
         "sync.h": "c",
         "console.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "process.h": "c",
+        "tss.h": "c"
     }
 }

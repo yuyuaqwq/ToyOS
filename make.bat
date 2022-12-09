@@ -28,6 +28,11 @@ cd .\lib
 call .\make.bat
 cd ..
 
+cd .\userprog
+call .\make.bat
+cd ..
+
+
 cd .\kernel
 call .\make.bat
 cd ..

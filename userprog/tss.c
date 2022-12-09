@@ -1,3 +1,4 @@
+#include "tss.h"
 
 #include "lib/stdint.h"
 #include "lib/string.h"
@@ -50,12 +51,12 @@ static GdtDesc MakeGdtDesc(uint32* descAddr, uint32 limit, uint8 attrLow, uint8 
     desc.baseLowWord = descBase & 0x0000ffff;
     desc.baseMidByte = ((descBase & 0x00ff0000) >> 16);
     desc.attrLowByte = (uint8)attrLow;
-    desc.limitHighAttrHigh = (((limit & 0x000f0000) >> 16) + (uint8)attrHigh);
+    desc.limitHighAttrHigh = (((limit & 0x000f0000) >> 16) | (uint8)(attrHigh << 4));
     desc.baseHighByte = descBase >> 24;
     return desc;
 }
 
-void TssInit() {
+void TssInit(void) {
     PutStr("TssInit start\n");
     uint32 tssSize = sizeof(Tss);
     memset(&gsTss, 0, tssSize);
@@ -73,7 +74,6 @@ void TssInit() {
     uint64 gdtOperand = ((8 * 7 - 1) | ((uint64)(uint32)0xc0000900 << 16));
 
     asm volatile("lgdt %0" : : "m"(gdtOperand));
-    asm volatile("ltr %w9" : : "r"(SELECTOR_TSS));
+    asm volatile("ltr %w0" : : "r"(SELECTOR_TSS));
     PutStr("TssInit and ltr done\n");
-
 }

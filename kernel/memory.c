@@ -2,6 +2,7 @@
 
 #include "lib/kernel/print.h"
 #include "kernel/debug.h"
+#include "thread/thread.h"
 
 
 
@@ -14,6 +15,10 @@ VirAddrPool gKernelVirAddrPool;
 
 static void MemPoolInit(uint32 memByteTotal) {
     PutStr("    MemPoolInit Start\n");
+
+    LockInit(&gKernelPhyAddrPool.lock);
+    LockInit(&gUserPhyAddrPool.lock);
+
     uint32 pageTableSize = PG_SIZE * 256;       // 内核总页表大小，0x768~0x1023共256个页面，1M
     uint32 usedMem = 0x100000 + pageTableSize;      // 已使用内存字节数，低端1M空间及内核页表总大小
     uint32 freeMem = memByteTotal - usedMem;        // 目前可用内存字节数
@@ -92,6 +97,7 @@ static void* VirAddrGet(PoolFlags pf, uint32 pgCnt) {
     int virAddrStart = 0, bitIdxStart = -1;
     uint32 cnt = 0;
     if (pf == kPfKernel) {
+        // 内核内存池
         bitIdxStart = BitmapScan(&gKernelVirAddrPool.vAddrBitmap, pgCnt);
         if (bitIdxStart == -1) {
             return NULL;
@@ -102,7 +108,17 @@ static void* VirAddrGet(PoolFlags pf, uint32 pgCnt) {
         virAddrStart = gKernelVirAddrPool.vAddrStart + bitIdxStart * PG_SIZE;
     }
     else {
-        // 用户内存池，未来再补充
+        // 用户内存池
+        TaskStruct* cur = RunningThread();
+        bitIdxStart = BitmapScan(&cur->userprogVAddr.vAddrBitmap, pgCnt);
+        if (bitIdxStart == -1) {
+            return NULL;
+        }
+        while (cnt < pgCnt) {
+            BitmapSet(&cur->userprogVAddr.vAddrBitmap, bitIdxStart + cnt++, 1);
+        }
+        virAddrStart = cur->userprogVAddr.vAddrStart + bitIdxStart * PG_SIZE;
+        ASSERT((uint32)virAddrStart < (0xc0000000 - PG_SIZE));
     }
     return virAddrStart;
 }
@@ -122,6 +138,15 @@ uint32* PdePtr(uint32 virAddr) {
     uint32* pde = (uint32*)((0xfffff000) + PDE_IDX(virAddr) * 4);
     return pde;
 }
+
+/*
+* 将虚拟地址转换为物理地址
+*/
+uint32 AddrV2P(uint32 vAddr) {
+    uint32* pte = PtePtr(vAddr);
+    return ((*pte & 0xfffff000) + (vAddr & 0x00000fff));
+}
+
 
 /*
 * 从物理内存池中分配1个物理页
@@ -205,3 +230,42 @@ void* GetKernelPages(uint32 pgCnt) {
     }
     return virAddr;
 }
+
+
+
+void* GetUserPages(uint32 pgCnt) {
+    LockAcquire(&gUserPhyAddrPool.lock);
+    void* vAddr = MallocPage(kPfUser, pgCnt);
+    memset(vAddr, 0, pgCnt * PG_SIZE);
+    LockRelease(&gUserPhyAddrPool.lock);
+    return vAddr;
+}
+
+
+void* GetAPage(PoolFlags pf, uint32 vAddr) {
+    PhyAddrPool* memPool = pf == kPfKernel ? &gKernelPhyAddrPool : &gUserPhyAddrPool;
+    LockAcquire(&memPool->lock);
+    TaskStruct* cur = RunningThread();
+    int32 bitIdx = -1;
+    if (cur->pgDir == NULL && pf == kPfUser) {
+        bitIdx = (vAddr - cur->userprogVAddr.vAddrStart) / PG_SIZE;
+        ASSERT(bitIdx > 0);
+        BitmapSet(&cur->userprogVAddr.vAddrBitmap, bitIdx, 1);
+    } else if (cur->pgDir == NULL && pf == kPfKernel) {
+        bitIdx = (vAddr - gKernelVirAddrPool.vAddrStart) / PG_SIZE;
+        ASSERT(bitIdx > 0);
+        BitmapSet(&gKernelVirAddrPool.vAddrBitmap, bitIdx, 1);
+    } else {
+        PANIC("GetAPage:not allow kernel alloc userspace or user alloc kernelspace by GetAPage");
+    }
+
+    void* pagePhyAddr = PhyAlloc(memPool);
+    if (pagePhyAddr == NULL) {
+        return NULL;
+    }
+    PageTableAdd((void*)vAddr, pagePhyAddr);
+    LockRelease(&memPool->lock);
+    return (void*)vAddr;
+}
+
+

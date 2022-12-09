@@ -4,7 +4,6 @@
 #include "lib/stdint.h"
 #include "lib/kernel/list.h"
 
-#include "thread/thread.h"
 
 typedef struct _Semaphore {
     uint8 value;
@@ -12,16 +11,13 @@ typedef struct _Semaphore {
 } Semaphore;
 
 typedef struct _Lock {
-    TaskStruct* holder;
+    struct _TaskStruct* holder;
     Semaphore semaphore;
     uint32 holderRepeatNr;
 } Lock;
 
 
 
-#include "sync.h"
-
-#include "kernel/interrupt.h"
 
 
 void SemaInit(Semaphore* pSema, uint8 value);

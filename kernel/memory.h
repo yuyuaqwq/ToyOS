@@ -2,7 +2,9 @@
 #define KERNEL_MEMORY_H_
 
 #include "lib/stdint.h"
+#include "thread/sync.h"
 #include "kernel/bitmap.h"
+
 
 /*
 * 虚拟地址池
@@ -19,6 +21,8 @@ typedef struct _PhyAddrPool {
     Bitmap poolBitmap;
     uint32 phyAddrStart;
     uint32 poolSize;
+
+    Lock lock;
 } PhyAddrPool;
 
 typedef enum _PoolFlags {
@@ -38,10 +42,9 @@ typedef enum _PoolFlags {
 extern PhyAddrPool gKernelPhyAddrPool, gUserPhyAddrPool;
 void MemInit(void);
 
-
 uint32* PtePtr(uint32 virAddr);
-
 uint32* PdePtr(uint32 virAddr);
+uint32 AddrV2P(uint32 vAddr);
 
 void* MallocPage(PoolFlags pf, uint32 pgCnt);
 
