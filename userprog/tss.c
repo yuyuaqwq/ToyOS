@@ -37,25 +37,40 @@ typedef struct _Tss {
     uint32 ioBase;
 } Tss;
 
+/*
+* 全局Tss结构，仅需要Tss中的esp0和ss0，提权时使用
+*/
 static Tss gsTss;
 
+/*
+* 更新全局Tss的esp0字段为内核栈底
+*/
 void UpdateTssEsp(TaskStruct* pThread) {
     // 切换任务也要切换Tss指向的内核栈
     gsTss.esp0 = (uint32*)((uint32)pThread + PG_SIZE);
 }
 
-static GdtDesc MakeGdtDesc(uint32* descAddr, uint32 limit, uint8 attrLow, uint8 attrHigh) {
+/*
+* 构建段描述符
+*/
+static GdtDesc MakeGdtDesc(uint32* descAddr, uint32 limit, uint32 attr) {
     uint32 descBase = (uint32)descAddr;
     GdtDesc desc;
+    
     desc.limitLowWord = limit & 0x0000ffff;
     desc.baseLowWord = descBase & 0x0000ffff;
-    desc.baseMidByte = ((descBase & 0x00ff0000) >> 16);
-    desc.attrLowByte = (uint8)attrLow;
-    desc.limitHighAttrHigh = (((limit & 0x000f0000) >> 16) | (uint8)(attrHigh << 4));
-    desc.baseHighByte = descBase >> 24;
+
+    desc.highDword = 0;
+    desc.highDword |= attr;
+    desc.highDword |= limit & 0x000f0000;
+    desc.highDword |= (descBase >> 16) & 0xff;
+    desc.highDword |= descBase & 0xff000000;
     return desc;
 }
 
+/*
+* Tss初始化
+*/
 void TssInit(void) {
     PutStr("TssInit start\n");
     uint32 tssSize = sizeof(Tss);
@@ -64,16 +79,16 @@ void TssInit(void) {
     gsTss.ioBase = tssSize;
 
     // GDT[4]TSS
-    *((GdtDesc*)0xc0000920) = MakeGdtDesc((uint32*)&gsTss, tssSize - 1, TSS_ATTR_LOW, TSS_ATTR_HIGH);
+    *((GdtDesc*)0xc0000920) = MakeGdtDesc((uint32*)&gsTss, tssSize - 1, TSS_ATTR);
     // GDT[5]用户数据段
-    *((GdtDesc*)0xc0000928) = MakeGdtDesc((uint32*)0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
+    *((GdtDesc*)0xc0000928) = MakeGdtDesc((uint32*)0, 0xfffff, GDT_CODE_ATTR);
     // GDT[6]用户代码段
-    *((GdtDesc*)0xc0000930) = MakeGdtDesc((uint32*)0, 0xfffff, GDT_DATA_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
+    *((GdtDesc*)0xc0000930) = MakeGdtDesc((uint32*)0, 0xfffff, GDT_DATA_ATTR);
 
-
+    // 需要修改界限，重新加载GDT
     uint64 gdtOperand = ((8 * 7 - 1) | ((uint64)(uint32)0xc0000900 << 16));
-
     asm volatile("lgdt %0" : : "m"(gdtOperand));
-    asm volatile("ltr %w0" : : "r"(SELECTOR_TSS));
+
+    asm volatile("ltr %w0" : : "r"(SELECTOR_TSS));      // 加载Tss
     PutStr("TssInit and ltr done\n");
 }

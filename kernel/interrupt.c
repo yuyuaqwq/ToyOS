@@ -41,7 +41,9 @@ static void PicInit(void) {
 
 
 
-#define IDT_DESC_CNT 0x30
+#define IDT_DESC_CNT 0x81
+
+extern uint32 SyscallHandler(void);
 
 // 中断门描述符结构体
 typedef struct _GateDesc {

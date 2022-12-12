@@ -25,7 +25,7 @@ int _main(void) {
     ThreadStart("kThread_b", 31, kThread_b, " A_");
 
     ProcessExecute(uProg_a, "uProg_a");
-    ProcessExecute(uProg_b, "uProg_b");
+    //ProcessExecute(uProg_b, "uProg_b");
 
     IntrEnable();
     while(1);
@@ -34,6 +34,7 @@ int _main(void) {
 
 
 void uProg_a(void) {
+    // PutStr("uProg_a"); PutStr("\n");
     while(1) {
         test_var_a++;
     }
@@ -51,7 +52,7 @@ void kThread_a(void* arg) {
     char* para = arg;
     while(1) {
         IntrStatus oldStatus = IntrDisable();
-        ConsolePutStr(" v_a:0x");ConsolePutInt(test_var_a);
+        // ConsolePutStr(" v_a:0x");ConsolePutInt(test_var_a);
         if (!IoQueueEmpty(&gKbdBuf)) {
             
             // ConsolePutStr(arg);
@@ -67,7 +68,7 @@ void kThread_b(void* arg) {
     char* para = arg;
     while(1) {
         IntrStatus oldStatus = IntrDisable();
-        ConsolePutStr(" v_b:0x");ConsolePutInt(test_var_b);
+        // ConsolePutStr(" v_b:0x");ConsolePutInt(test_var_b);
         if (!IoQueueEmpty(&gKbdBuf)) {
             
             // ConsolePutStr(arg);

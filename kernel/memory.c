@@ -142,7 +142,7 @@ uint32* PdePtr(uint32 virAddr) {
 /*
 * 将虚拟地址转换为物理地址
 */
-uint32 AddrV2P(uint32 vAddr) {
+uint32 AddrV2P(uint32 vAddr) {   
     uint32* pte = PtePtr(vAddr);
     return ((*pte & 0xfffff000) + (vAddr & 0x00000fff));
 }
@@ -247,7 +247,7 @@ void* GetAPage(PoolFlags pf, uint32 vAddr) {
     LockAcquire(&memPool->lock);
     TaskStruct* cur = RunningThread();
     int32 bitIdx = -1;
-    if (cur->pgDir == NULL && pf == kPfUser) {
+    if (cur->pgDir != NULL && pf == kPfUser) {
         bitIdx = (vAddr - cur->userprogVAddr.vAddrStart) / PG_SIZE;
         ASSERT(bitIdx > 0);
         BitmapSet(&cur->userprogVAddr.vAddrBitmap, bitIdx, 1);

@@ -14,7 +14,6 @@ _SwitchTo:
     mov eax, [esp + 20]     ; 第一个参数，cur
     mov [eax], esp      ; cur.selfKStack = esp
 
-    ; 得到next
     mov eax, [esp + 24]     ; 第二个参数，next
     mov esp, [eax]      ; esp = next.selfKStack，至此完成栈切换，即线程切换
 
@@ -22,4 +21,4 @@ _SwitchTo:
     pop ebx
     pop edi
     pop esi
-    ret
+    ret     ; 由于栈切换了，ret是返回到新线程栈存储的地址

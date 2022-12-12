@@ -38,32 +38,27 @@
 #define SELECTOR_K_STACK SELECTOR_K_DATA
 #define SELECTOR_K_GS ((3 << 3) | TI_GDT | RPL0)
 
-#define SELECTOR_U_CODE ((1 << 3) | TI_GDT | RPL3)
-#define SELECTOR_U_DATA ((2 << 3) | TI_GDT | RPL3)
+#define SELECTOR_U_CODE ((5 << 3) | TI_GDT | RPL3)
+#define SELECTOR_U_DATA ((6 << 3) | TI_GDT | RPL3)
 #define SELECTOR_U_STACK SELECTOR_U_DATA
 
-#define GDT_ATTR_HIGH (DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL)
 
-#define GDT_CODE_ATTR_LOW_DPL3 (DESC_P | DESC_DPL_3 | DESC_S_CODE | DESC_AVL)
-#define GDT_DATA_ATTR_LOW_DPL3 (DESC_P | DESC_DPL_3 | DESC_S_DATA | DESC_AVL)
+#define GDT_CODE_ATTR (DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_P | DESC_DPL_3 | DESC_S_CODE | DESC_TYPE_CODE)
+#define GDT_DATA_ATTR (DESC_G_4K | DESC_D_32 | DESC_L | DESC_AVL | DESC_P | DESC_DPL_3 | DESC_S_DATA | DESC_TYPE_DATA)
 
 
 /*
 * TSS描述符属性
 */
-#define TSS_DESC_D (0 << 6)
-#define TSS_ATTR_HIGH (DESC_G_4K | TSS_DESC_D | DESC_L | DESC_AVL | 0)
-#define TSS_ATTR_LOW (DESC_P | DESC_DPL_0 | DESC_S_SYS | DESC_TYPE_TSS)
+#define TSS_DESC_D (0 << 22)
+#define TSS_ATTR (DESC_G_4K | TSS_DESC_D | DESC_L | DESC_AVL | DESC_P | DESC_DPL_0 | DESC_S_SYS | DESC_TYPE_TSS | 0)
 
 #define SELECTOR_TSS ((4 << 3) | TI_GDT | RPL0)
 
 typedef struct _GdtDesc {
     uint16 limitLowWord;
     uint16 baseLowWord;
-    uint8 baseMidByte;
-    uint8 attrLowByte;
-    uint8 limitHighAttrHigh;
-    uint8 baseHighByte;
+    uint32 highDword;
 } GdtDesc;
 
 

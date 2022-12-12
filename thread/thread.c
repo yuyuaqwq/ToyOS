@@ -33,7 +33,7 @@ void Schedule(void) {
     TaskStruct* cur = RunningThread();
 
     //ElemPrint(&cur->generalTag, "----------curThread");
-    //PutStr("curThreadName:"); PutStr(cur->name); PutStr("\n");
+    PutStr("curThreadName:"); PutStr(cur->name); PutStr("\n");
     //ListPrint(&gThreadAllList, "Schedule.all");
     //ListPrint(&gThreadReadyList, "Schedule.ready1");
     
@@ -57,6 +57,7 @@ void Schedule(void) {
     TaskStruct* next = Elem2Entry(TaskStruct, generalTag, gsThreadTag);
     next->status = kTaskRunning;
     ProcessActivate(next);
+    PutStr("newThreadName:"); PutStr(next->name); PutStr("\n");
     SwitchTo(cur, next);        // 切换线程
 }
 

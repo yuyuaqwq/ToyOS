@@ -2,6 +2,8 @@
 %define ERROR_CODE nop
 %define ZERO push 0
 
+extern _PutInt
+
 extern _gIdtTable
 
 section .data
@@ -37,7 +39,7 @@ section .data
 section .text
 global IntrExit
 IntrExit:
-    add esp, 4
+    add esp, 4      ; 跳过中断向量号
     popad
     pop gs
     pop fs
