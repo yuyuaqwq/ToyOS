@@ -7,7 +7,7 @@
 /*
 * 初始化信号量
 */
-void SemaInit(Semaphore* pSema, uint8 value) {
+void SemaInit(Semaphore* pSema, uint8_t value) {
     pSema->value = value;
     ListInit(&pSema->waiters);
 }

@@ -47,12 +47,12 @@ static void PicInit(void) {
 
 // 中断门描述符结构体
 typedef struct _GateDesc {
-    uint16 funcOffsetLowWord;
-    uint16 selector;
-    uint8 dCount;
+    uint16_t funcOffsetLowWord;
+    uint16_t selector;
+    uint8_t dCount;
 
-    uint8 attribute;
-    uint16 funcOffsetHighWord;
+    uint8_t attribute;
+    uint16_t funcOffsetHighWord;
 } GateDesc;
  
 static GateDesc gIdt[IDT_DESC_CNT];
@@ -66,17 +66,17 @@ extern IntrHandler gIntrEntryTable[IDT_DESC_CNT];
 /*
 * 系统调用中断入口
 */
-extern uint32 SyscallHandler(void);
+extern uint32_t SyscallHandler(void);
 
 /* 
 * 构建中断描述符
 */
-static void MakeIdtDesc(GateDesc* pGDesc, uint8 attr, IntrHandler function) {
-    pGDesc->funcOffsetLowWord = (uint32)function & 0x0000ffff;
+static void MakeIdtDesc(GateDesc* pGDesc, uint8_t attr, IntrHandler function) {
+    pGDesc->funcOffsetLowWord = (uint32_t)function & 0x0000ffff;
     pGDesc->selector = SELECTOR_K_CODE;
     pGDesc->dCount = 0;
     pGDesc->attribute = attr;
-    pGDesc->funcOffsetHighWord = ((uint32)function & 0xffff0000) >> 16;
+    pGDesc->funcOffsetHighWord = ((uint32_t)function & 0xffff0000) >> 16;
 }
 
 /* 
@@ -95,7 +95,7 @@ static void IdtDescInit(void) {
 * 通用中断处理例程
 * 从kernel.asm回调
 */
-static void GeneralIntrHandler(uint8 vecNr) {
+static void GeneralIntrHandler(uint8_t vecNr) {
     if (vecNr == 0x27 || vecNr == 0x2f) {
         // IRQ7 和 IRQ15会产生伪中断，无需处理
         return;
@@ -156,7 +156,7 @@ static void ExceptionInit(void) {
 /* 
 * 注册指定中断向量号的处理例程
 */
-void IntrRegisterHandler(uint8 vectorNo, IntrHandler function) {
+void IntrRegisterHandler(uint8_t vectorNo, IntrHandler function) {
     gIdtTable[vectorNo] = function;
 }
 
@@ -170,7 +170,7 @@ void IdtInit(void) {
     PicInit();      // 初始化8259A
 
     // 加载Idt
-    uint64 idtOperand = ((sizeof(gIdt) - 1) | ((uint64)(uint32)gIdt << 16));
+    uint64_t idtOperand = ((sizeof(gIdt) - 1) | ((uint64_t )(uint32_t)gIdt << 16));
     asm volatile("lidt %0" : : "m"(idtOperand));
     PutStr("IdtInit done\n");
 }
@@ -224,7 +224,7 @@ IntrStatus IntrSetStatus(IntrStatus status) {
 * 获取中断状态
 */
 IntrStatus IntrGetStatus(void) {
-    uint32 eflags = 0;
+    uint32_t eflags = 0;
     GET_EFLAGS(eflags);
     return (EFLAGS_IF & eflags) ? kIntrOn : kIntrOff;
 }

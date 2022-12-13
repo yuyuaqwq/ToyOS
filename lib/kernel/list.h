@@ -33,7 +33,7 @@ void ListAppend(List* pList, ListElem* pElem);
 void ListRemove(ListElem* pElem);
 ListElem* ListPop(List* pList);
 bool ListEmpty(List* pList);
-uint32 ListLen(List* pList);
+uint32_t ListLen(List* pList);
 ListElem* ListTraversal(List* pList, function func, int arg);
 bool ElemFind(List* pList, ListElem* objElem);
 

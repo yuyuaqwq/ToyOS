@@ -11,7 +11,7 @@ void PanicSpin(char* fileName, int line, const char* func, const char* condition
     PutChar('\n'); PutStr("!!!!!error!!!!!"); PutChar('\n');
     PutStr("filename:"); PutStr(fileName); PutChar('\n');
     PutStr("line:0x"); PutInt(line); PutChar('\n');
-    PutStr("function:"); PutStr((uint8*)func); PutChar('\n');
-    PutStr("condition:"); PutStr((uint8*)condition); PutChar('\n');
+    PutStr("function:"); PutStr((uint8_t *)func); PutChar('\n');
+    PutStr("condition:"); PutStr((uint8_t *)condition); PutChar('\n');
     while(1);
 }

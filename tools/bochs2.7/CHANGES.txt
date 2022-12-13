@@ -2569,7 +2569,7 @@ Detailed change log :
  [1021758] GNU/k*BSD host support by Robert Millan
   [969967] int 15/ah=87h clearing cr0 by Ben Lunt
  [1048327] Russian Keymap by Dmitry Soshnikov
-  [851332] DESTDIR support for install_dlx by Ville Skyttä
+  [851332] DESTDIR support for install_dlx by Ville Skyttï¿½
   [970929] gdbstub support for MinGW tool chains by Muranaka Masaki
  [1021740] Turn gdb stub into a runtime option by Charles Duffy
  [1063329] RFB key press/release bug fix by Remko van der Vossen
@@ -2998,7 +2998,7 @@ Detailed change log :
 - System BIOS :
   - fixed int15 function e801 (get memory size) (Christophe)
   - added int75_handler for FPU Dos Exceptions (Christophe)
-  - added int16 function 0a (Get Keyboard ID) (Volker)
+  - added int16_t  function 0a (Get Keyboard ID) (Volker)
   - added support for ElTorito Harddisk-on-CD emulation (Christophe)
   - fixed ATA/Serial ioport conflict (Daniel)
 
@@ -3050,7 +3050,7 @@ Detailed change log :
 - SF patches partially applied
   #707931  Support EGA/VGA write mode 2 and others                     (Anonymous)
            already applied: disable IME, split screen, write mode 2,
-           BIOS INT16h/AH=05h
+           BIOS int16_t h/AH=05h
   #856506/#856510  Patch to fix compile-time iodev/cd-rom.cc error     (alden.dima at nist.gov)
            Correct patch provided in SF bug report #843433             (birkhofer at users.sourceforge.net)
 
@@ -3532,10 +3532,10 @@ Detailed change log follows.
     - never done for cdroms
     - always done for hard-disks
     - conditional for floppies
-  - add keyboard int16 functions 0x09 (get keyboard functionality) and
+  - add keyboard int16_t  functions 0x09 (get keyboard functionality) and
     0x0a (get keyboard id) (Christophe)
   - fix bug [ 629810 ] int 16/ah=01 broken? Enable interrupt on entering
-    int16 handler (Christophe)
+    int16_t  handler (Christophe)
   - new keyboard init in POST (patch from Adam Sulmicki)
   - flush input and output keyboard buffer before keyboard self test
     (Volker and Christophe)

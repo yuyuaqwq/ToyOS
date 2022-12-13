@@ -24,6 +24,18 @@ List gThreadAllList;
 // 当前正在运行的线程
 static ListElem* gsThreadTag;
 
+// pid锁
+Lock gPidLock;
+
+static Pid AllocPid(void) {
+    static Pid nextPid = 0;
+    LockAcquire(&gPidLock);
+    nextPid++;
+    LockRelease(&gPidLock);
+    return nextPid;
+}
+
+
 extern void SwitchTo(TaskStruct* cur, TaskStruct* next);
 
 /*
@@ -33,7 +45,7 @@ void Schedule(void) {
     TaskStruct* cur = RunningThread();
 
     //ElemPrint(&cur->generalTag, "----------curThread");
-    PutStr("curThreadName:"); PutStr(cur->name); PutStr("\n");
+    // PutStr("curThreadName:"); PutStr(cur->name); PutStr("\n");
     //ListPrint(&gThreadAllList, "Schedule.all");
     //ListPrint(&gThreadReadyList, "Schedule.ready1");
     
@@ -57,7 +69,7 @@ void Schedule(void) {
     TaskStruct* next = ELEM_TO_ENTRY(TaskStruct, generalTag, gsThreadTag);
     next->status = kTaskRunning;
     ProcessActivate(next);
-    PutStr("newThreadName:"); PutStr(next->name); PutStr("\n");
+    // PutStr("newThreadName:"); PutStr(next->name); PutStr("\n");
     SwitchTo(cur, next);        // 切换线程
 }
 
@@ -65,7 +77,7 @@ void Schedule(void) {
 * 获取当前线程的PCB(当前栈底地址)
 */
 TaskStruct* RunningThread(void) {
-    uint32 esp;
+    uint32_t esp;
     asm("mov %%esp, %0" : "=g"(esp));
     return (TaskStruct*)(esp & 0xfffff000);     // 栈与PCB在同一页面，故取页面基址
 }
@@ -94,6 +106,7 @@ void ThreadCreate(TaskStruct* pThread, ThreadFunc function, void* funcArg) {
 */
 void ThreadInit(TaskStruct* pThread, const char* name, int prio) {
     memset(pThread, 0, sizeof(*pThread));
+    pThread->pid = AllocPid();
     strcpy(pThread->name, name);
     if (pThread == gMainThread) {
         // 如果被初始化的线程是main线程，直接设置为运行状态，因为当前执行流一定是main线程
@@ -104,7 +117,7 @@ void ThreadInit(TaskStruct* pThread, const char* name, int prio) {
     }
 
     // PCB同一页面的高地址即是该线程的内核栈空间，这个是栈顶地址
-    pThread->selfKStack = (uint32*)((uint32)pThread + PG_SIZE);
+    pThread->selfKStack = (uint32_t*)((uint32_t)pThread + PG_SIZE);
 
     pThread->priority = prio;
     pThread->ticks = prio;
@@ -185,7 +198,7 @@ void ThreadEnvirInit(void) {
     PutStr("ThreadInitEnvir start\n");
     ListInit(&gThreadAllList);
     ListInit(&gThreadReadyList);
-
+    LockInit(&gPidLock);
     MakeMainThread();
     PutStr("ThreadInitEnvir done\n");
 }

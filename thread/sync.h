@@ -6,21 +6,21 @@
 
 
 typedef struct _Semaphore {
-    uint8 value;
+    uint8_t value;
     List waiters;
 } Semaphore;
 
 typedef struct _Lock {
     struct _TaskStruct* holder;
     Semaphore semaphore;
-    uint32 holderRepeatNr;
+    uint32_t holderRepeatNr;
 } Lock;
 
 
 
 
 
-void SemaInit(Semaphore* pSema, uint8 value);
+void SemaInit(Semaphore* pSema, uint8_t value);
 void SemaDown(Semaphore* pSema);
 void SemaUp(Semaphore* pSema);
 

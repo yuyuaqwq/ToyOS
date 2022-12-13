@@ -8,6 +8,7 @@
 #include "device/keyboard.h"
 #include "thread/thread.h"
 #include "userprog/tss.h"
+#include "userprog/syscall-init.h"
 
 void InitAll(void) {
     PutStr("InitAll\n");
@@ -18,4 +19,5 @@ void InitAll(void) {
     KeyBoardInit();
     ConsoleInit();
     TssInit();
+    SyscallInit();
 }

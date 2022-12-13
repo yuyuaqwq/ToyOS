@@ -3,20 +3,20 @@
 #include "kernel/global.h"
 #include "kernel/debug.h"
 
-void memset(void* dst_, uint8 value, uint32 size) {
+void memset(void* dst_, uint8_t value, uint32_t size) {
     ASSERT(dst_ != NULL);
-    uint8* dst = (uint8*)dst_;
+    uint8_t * dst = (uint8_t *)dst_;
     while (size-- > 0) *dst++ = value;
 }
 
-void memcpy(void* dst_, const void* src_, uint32 size) {
+void memcpy(void* dst_, const void* src_, uint32_t size) {
     ASSERT(dst_ != NULL && src_ != NULL);
-    uint8* dst = dst_;
-    const uint8* src = src_;
+    uint8_t * dst = dst_;
+    const uint8_t * src = src_;
     while (size-- > 0) *dst++ = *src++;
 }
 
-int32 memcmp(const void* a_, const void* b_, uint32 size) {
+int32_t memcmp(const void* a_, const void* b_, uint32_t size) {
     const char* a = a_;
     const char* b = b_;
     ASSERT(a != NULL && b != NULL);
@@ -36,14 +36,14 @@ char* strcpy(char* dst_, const char* src_) {
     return r;
 }
 
-uint32 strlen(const char* str) {
+uint32_t strlen(const char* str) {
     ASSERT(str != NULL);
     const char* p = str;
     while(*p++);
     return (p - str - 1);
 }
 
-int32 strcmp(const char* a, const char* b) {
+int32_t strcmp(const char* a, const char* b) {
     ASSERT(a != NULL || b != NULL);
     while (*a != 0 && *b != 0) {
         a++; b++;
@@ -51,7 +51,7 @@ int32 strcmp(const char* a, const char* b) {
     return *a < *b ? - 1 : *a > *b;
 }
 
-char* strchr(const char* str, const uint8 ch) {
+char* strchr(const char* str, const uint8_t ch) {
     ASSERT(str != NULL);
     while (*str != 0) {
         if (*str == ch) {
@@ -62,7 +62,7 @@ char* strchr(const char* str, const uint8 ch) {
     return NULL;
 }
 
-char* strrchr(const char* str, const uint8 ch) {
+char* strrchr(const char* str, const uint8_t ch) {
     ASSERT(str != NULL);
     const char* lastChar = NULL;
     while (*str != 0) {
@@ -83,9 +83,9 @@ char* strcat(char* dst_, const char* src_) {
     return dst_;
 }
 
-uint32 strchrs(const char* str, uint8 ch) {
+uint32_t strchrs(const char* str, uint8_t ch) {
     ASSERT(str != NULL);
-    uint32 chCnt = 0;
+    uint32_t chCnt = 0;
     const char* p = str;
     while(*p != 0) {
         if(*p == ch) {

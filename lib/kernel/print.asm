@@ -6,7 +6,7 @@ SELECTOR_VIDEO equ (0x0003 << 3) + TI_GDT + RPL0
 section .text
 
 ;----------将以0结尾的字符串写入到光标所在处----------
-; int8* str
+; int8_t * str
 global _PutStr
 _PutStr:
     push ebx
@@ -98,7 +98,7 @@ _PutInt:
 
 
 ;----------将字符写入到光标所在处----------
-; int8 charAscii
+; int8_t charAscii
 global _PutChar
 _PutChar:
     pushad

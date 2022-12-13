@@ -10,7 +10,7 @@ void IoQueueInit(IoQueue* pIoq) {
     pIoq->head = pIoq->tail = 0;
 }
 
-static int32 NextPos(int32 pos) {
+static int32_t NextPos(int32_t pos) {
     return (pos + 1) % BUF_SIZE;
 }
 

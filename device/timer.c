@@ -17,13 +17,13 @@
 #define READ_WRITE_LATCH 3
 #define PIT_CONTROL_PORT 0x43
 
-static void FrequencySet(uint8 counterPort, uint8 counterNo, uint8 rwl, uint8 counterMode, uint16 counterValue) {
-    outb(PIT_CONTROL_PORT, (uint8)((counterNo << 6) | (rwl << 4) | (counterMode << 1)));
-    outb(counterPort, (uint8)counterValue);
-    outb(counterPort, (uint8)(counterValue >> 8));
+static void FrequencySet(uint8_t counterPort, uint8_t counterNo, uint8_t rwl, uint8_t counterMode, uint16_t counterValue) {
+    outb(PIT_CONTROL_PORT, (uint8_t )((counterNo << 6) | (rwl << 4) | (counterMode << 1)));
+    outb(counterPort, (uint8_t )counterValue);
+    outb(counterPort, (uint8_t )(counterValue >> 8));
 }
 
-uint32 gTicks;
+uint32_t gTicks;
 static void IntrTimerHandler(void) {
     TaskStruct* curThread = RunningThread();
     ASSERT(curThread->stackMagic = 'THRE');

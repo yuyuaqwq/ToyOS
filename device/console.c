@@ -25,13 +25,13 @@ void ConsolePutStr(char* str) {
     ConsoleRelease();
 }
 
-void ConsolePutChar(uint8 charAscii) {
+void ConsolePutChar(uint8_t charAscii) {
     ConsoleAcquire();
     PutChar(charAscii);
     ConsoleRelease();
 }
 
-void ConsolePutInt(uint32 num) {
+void ConsolePutInt(uint32_t num) {
     ConsoleAcquire();
     PutInt(num);
     ConsoleRelease();

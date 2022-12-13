@@ -14,7 +14,7 @@ void ConsoleInit(void);
 void ConsoleAcquire(void);
 void ConsoleRelease(void);
 void ConsolePutStr(char* str);
-void ConsolePutChar(uint8 charAscii);
-void ConsolePutInt(uint32 num);
+void ConsolePutChar(uint8_t charAscii);
+void ConsolePutInt(uint32_t num);
 
 #endif // DEVICE_CONSOLE_H_

@@ -23,27 +23,27 @@ typedef enum _TaskStatus {
 * 中断上下文环境
 */
 typedef struct _IntrStack {
-    uint32 vecNo;
-    uint32 edi;
-    uint32 esi;
-    uint32 ebp;
-    uint32 espDummy;
-    uint32 ebx;
-    uint32 edx;
-    uint32 ecx;
-    uint32 eax;
-    uint32 gs;
-    uint32 fs;
-    uint32 es;
-    uint32 ds;
+    uint32_t vecNo;
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebp;
+    uint32_t espDummy;
+    uint32_t ebx;
+    uint32_t edx;
+    uint32_t ecx;
+    uint32_t eax;
+    uint32_t gs;
+    uint32_t fs;
+    uint32_t es;
+    uint32_t ds;
 
 // 从低特权级进入高特权级自动压入
-    uint32 errCode;
+    uint32_t errCode;
     void (*eip)(void);
-    uint32 cs;
-    uint32 eflags;
-    uint32* esp;
-    uint32 ss;
+    uint32_t cs;
+    uint32_t eflags;
+    uint32_t* esp;
+    uint32_t ss;
 } IntrStack;
 
 
@@ -52,10 +52,10 @@ typedef struct _IntrStack {
 */
 typedef struct _ThreadStack {
     // 因为是在SwitchTo函数中切换的寄存器环境，只需要备份非易变寄存器，编译器不会生成在调用函数前将不可覆盖值保存到易变寄存器中的指令。
-    uint32 ebp;
-    uint32 ebx;
-    uint32 edi;
-    uint32 esi;
+    uint32_t ebp;
+    uint32_t ebx;
+    uint32_t edi;
+    uint32_t esi;
 
     void (*eip)(ThreadFunc* func, void* funcArg);
 
@@ -64,26 +64,27 @@ typedef struct _ThreadStack {
     void* funcArg;
 } ThreadStack;
 
-typedef int16 Pid;
+typedef int16_t Pid;
 /*
 * PCB
 */
 typedef struct _TaskStruct {
-    uint32* selfKStack;     // 内核线程的栈指针，在 切出/切回 时 保存/恢复
+    uint32_t* selfKStack;     // 内核线程的栈指针，在 切出/切回 时 保存/恢复
     Pid pid;
     TaskStatus status;
     char name[16];
-    uint8 priority;
-    uint8 ticks;        // 每次在处理器上执行的时间嘀嗒数
+    uint8_t priority;
+    uint8_t ticks;        // 每次在处理器上执行的时间嘀嗒数
 
-    uint32 elapsedTicks;        // 线程所占用的时间嘀嗒数
+    uint32_t elapsedTicks;        // 线程所占用的时间嘀嗒数
 
     ListElem generalTag;        // 在一般线程队列中的节点
     ListElem allListTag;        // 在所有线程队列中的节点
 
-    uint32* pgDir;      // 进程页表虚拟地址
+    uint32_t* pgDir;      // 进程页表虚拟地址
     VirAddrPool userprogVAddr;      // 用户进程虚拟地址池
-    uint32 stackMagic;
+    MemBlockDesc userBlockDesc[DESC_CNT];       // 用户进程内存块描述符
+    uint32_t stackMagic;
 } TaskStruct;
 
 void Schedule(void);

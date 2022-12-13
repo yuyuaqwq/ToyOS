@@ -102,7 +102,9 @@ VECTOR 0x2f, ZERO       ; 保留
 extern _gSyscallTable
 section .text
 ; 80号中断
-_SyscallHandle:
+global _SyscallHandler
+_SyscallHandler:
+
     ; 构造中断环境
     push 0
 
@@ -114,12 +116,16 @@ _SyscallHandle:
 
     push 0x80
 
+    mov ebx, [esp + 4 + 12 + 48 + 4]        ; 获取cpu压入的用户栈指针
+
     ; 压入r3参数
-    push edx
-    push ecx
-    push ebx
+    push dword [ebx + 12]
+    push dword [ebx + 8]
+    push dword [ebx + 4]
+    mov eax, [ebx]      ; 子功能号
+
     call [_gSyscallTable + eax*4]       ; 系统调用服务表
     add esp, 12
 
-    mov [esp + 8*4], eax        ; 返回值存放到内核栈中eax的位置，交给popad恢复eax
+    mov [esp + 8*4], eax        ; eax会被popad覆盖，故这里返回值存放到内核栈中eax的位置，交给popad再次覆写eax
     jmp IntrExit

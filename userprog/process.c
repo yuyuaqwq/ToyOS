@@ -20,7 +20,6 @@ void StartProcess(void* fileName_) {
     TaskStruct* cur = RunningThread();
     cur->selfKStack += sizeof(ThreadStack);
     IntrStack* procStack = (IntrStack*)cur->selfKStack;
-    PutInt(procStack); PutStr("\n");
     // 构建栈，通过iretd降权到r3
     procStack->edi = procStack->esi = procStack->ebp = procStack->espDummy = 0;
     procStack->ebx = procStack->edx = procStack->ecx = procStack->eax = 0;
@@ -29,7 +28,7 @@ void StartProcess(void* fileName_) {
     procStack->eip = function;
     procStack->cs = SELECTOR_U_CODE;
     procStack->eflags = (EFLAGS_IOPL_0 | EFLAGS_MBS | EFLAGS_IF_1);
-    procStack->esp = (void*)((uint32)GetAPage(kPfUser, USER_STACK3_VADDR) + PG_SIZE);       // 分配用户进程栈
+    procStack->esp = (void*)((uint32_t)GetAPage(kPfUser, USER_STACK3_VADDR) + PG_SIZE);       // 分配用户进程栈
     procStack->ss = SELECTOR_U_DATA;
     asm volatile("movl %0, %%esp; jmp IntrExit" : : "g"(procStack) : "memory");
 }
@@ -40,13 +39,12 @@ void StartProcess(void* fileName_) {
 * 任务为线程时，切换cr3为内核页目录
 */
 void PageDirActivate(TaskStruct* pThread) {
-    uint32 pageDirPhyAddr = 0x100000;       // 线程统一使用内核页目录
+    uint32_t pageDirPhyAddr = 0x100000;       // 线程统一使用内核页目录
     if (pThread->pgDir != NULL) {
-        pageDirPhyAddr = AddrV2P((uint32)pThread->pgDir);
+        pageDirPhyAddr = AddrV2P((uint32_t)pThread->pgDir);
     }
 
     asm volatile("movl %0, %%cr3" : : "r"(pageDirPhyAddr) : "memory");
-    PutInt(pageDirPhyAddr); PutChar('\n');
 }
 
 /*
@@ -63,16 +61,16 @@ void ProcessActivate(TaskStruct* pThread) {
 /*
 * 创建进程页目录
 */
-uint32* CreatePageDir(void) {
-    uint32* pageDirVAddr = GetKernelPages(1);
+uint32_t* CreatePageDir(void) {
+    uint32_t* pageDirVAddr = GetKernelPages(1);
     if (pageDirVAddr == NULL) {
         ConsolePutStr("CreatePageDir: GetKernelPages failed!");
         return NULL;
     }
 
     // 进程共用内核空间，映射到相同的页表中
-    memcpy((void*)((uint32)pageDirVAddr + 0x300 * 4), (const void*)(0xfffff000 + 0x300 * 4), 0x100 * 4);
-    uint32 newPageDirPhyAddr = AddrV2P((uint32)pageDirVAddr);
+    memcpy((void*)((uint32_t)pageDirVAddr + 0x300 * 4), (const void*)(0xfffff000 + 0x300 * 4), 0x100 * 4);
+    uint32_t newPageDirPhyAddr = AddrV2P((uint32_t)pageDirVAddr);
     pageDirVAddr[1023] = newPageDirPhyAddr | PG_US_U |PG_RW_W | PG_P_1;     // 页目录自映射
     return pageDirVAddr;
 }
@@ -82,7 +80,7 @@ uint32* CreatePageDir(void) {
 */
 void CreateUserVAddrBitmap(TaskStruct* userProg) {
     userProg->userprogVAddr.vAddrStart = USER_VADDR_START;
-    uint32 bitmapPgCnt = DIV_ROUND_UP((0xc0000000 - USER_VADDR_START) / PG_SIZE / 8, PG_SIZE);
+    uint32_t bitmapPgCnt = DIV_ROUND_UP((0xc0000000 - USER_VADDR_START) / PG_SIZE / 8, PG_SIZE);
     userProg->userprogVAddr.vAddrBitmap.bits = GetKernelPages(bitmapPgCnt);
     userProg->userprogVAddr.vAddrBitmap.btmpByteLen = (0xc0000000 - USER_VADDR_START) / PG_SIZE/ 8;
     BitmapInit(&userProg->userprogVAddr.vAddrBitmap);
@@ -98,6 +96,9 @@ void ProcessExecute(void* filename, char* name) {
     CreateUserVAddrBitmap(pThread);     // 进程需要管理自己的用户空间地址
     ThreadCreate(pThread, StartProcess, filename);
     pThread->pgDir = CreatePageDir();
+
+
+    BlockDescInit(pThread->userBlockDesc);
 
 
     // 添加到调度链表中

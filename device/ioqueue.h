@@ -12,8 +12,8 @@ typedef struct _IoQueue {
     TaskStruct* producer;
     TaskStruct* consumer;
     char buf[BUF_SIZE];
-    int32 head;
-    int32 tail;
+    int32_t head;
+    int32_t tail;
 } IoQueue;
 
 #include "ioqueue.h"

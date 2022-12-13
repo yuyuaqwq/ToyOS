@@ -119,9 +119,9 @@ ListElem* ListTraversal(List* pList, function func, int arg) {
 /*
 * 获取链表长度
 */
-uint32 ListLen(List* pList) {
+uint32_t ListLen(List* pList) {
     ListElem* pElem = pList->head.next;
-    uint32 length = 0;
+    uint32_t length = 0;
     while (pElem != &pList->tail) {
         length++;
         pElem = pElem->next;

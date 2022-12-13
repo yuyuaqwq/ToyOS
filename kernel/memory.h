@@ -3,7 +3,7 @@
 
 #include "lib/stdint.h"
 #include "thread/sync.h"
-#include "kernel/bitmap.h"
+#include "lib/kernel/bitmap.h"
 
 
 /*
@@ -11,7 +11,7 @@
 */
 typedef struct _VirAddrPool {
     Bitmap vAddrBitmap;     // 位图
-    uint32 vAddrStart;      // 起始地址
+    uint32_t vAddrStart;      // 起始地址
 } VirAddrPool;
 
 /*
@@ -19,8 +19,8 @@ typedef struct _VirAddrPool {
 */
 typedef struct _PhyAddrPool {
     Bitmap poolBitmap;
-    uint32 phyAddrStart;
-    uint32 poolSize;
+    uint32_t phyAddrStart;
+    uint32_t poolSize;
 
     Lock lock;
 } PhyAddrPool;
@@ -42,13 +42,32 @@ typedef enum _PoolFlags {
 extern PhyAddrPool gKernelPhyAddrPool, gUserPhyAddrPool;
 void MemInit(void);
 
-uint32* PtePtr(uint32 virAddr);
-uint32* PdePtr(uint32 virAddr);
-uint32 AddrV2P(uint32 vAddr);
+uint32_t* PtePtr(uint32_t virAddr);
+uint32_t* PdePtr(uint32_t virAddr);
+uint32_t AddrV2P(uint32_t vAddr);
 
-void* MallocPage(PoolFlags pf, uint32 pgCnt);
+void* MallocPage(PoolFlags pf, uint32_t pgCnt);
 
-void* GetKernelPages(uint32 pgCnt);
+void* GetKernelPages(uint32_t pgCnt);
 
+/*
+* 内存块
+*/
+typedef struct _MemBlock {
+    ListElem freeElem;      // 链接空闲节点
+} MemBlock;
+
+/*
+* 内存块描述符
+*/
+typedef struct _MemBlockDesc {
+    uint32_t blockSize;     // 内存块大小
+    uint32_t blockPerArena;     // 当前Arena中可容纳此MemBlock的数量
+    List freeList;      // 空闲MemBlock链表
+} MemBlockDesc;
+
+#define DESC_CNT 7      // 7种规格的内存块，16, 32, 64, 128, 256, 512, 1024
+
+void BlockDescInit(MemBlockDesc* descArray);
 
 #endif // KERNEL_MEMORY_H_

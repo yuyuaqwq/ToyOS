@@ -6,6 +6,11 @@
 #include "device/ioqueue.h"
 #include "device/keyboard.h"
 
+#include "userprog/syscall-init.h"
+#include "lib/user/syscall.h"
+#include "lib/stdio.h"
+
+
 // 要让_main作为第一个函数实现
 void kThread_a(void* arg);
 void kThread_b(void* arg);
@@ -25,7 +30,7 @@ int _main(void) {
     ThreadStart("kThread_b", 31, kThread_b, " A_");
 
     ProcessExecute(uProg_a, "uProg_a");
-    //ProcessExecute(uProg_b, "uProg_b");
+    ProcessExecute(uProg_b, "uProg_b");
 
     IntrEnable();
     while(1);
@@ -34,15 +39,19 @@ int _main(void) {
 
 
 void uProg_a(void) {
+    printf(" I am %s, my pid:%d%c", "prog_a", GetPid(), '\n');
+    // test_var_a = GetPid();
     // PutStr("uProg_a"); PutStr("\n");
     while(1) {
-        test_var_a++;
+        // test_var_a++;
     }
 }
 
 void uProg_b(void) {
+    // test_var_b = GetPid();
+    printf(" I am %s, my pid:%d%c", "prog_b", GetPid(), '\n');
     while(1) {
-        test_var_b++;
+        // test_var_b++;
     }
 }
 

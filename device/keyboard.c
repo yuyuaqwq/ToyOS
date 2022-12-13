@@ -109,7 +109,7 @@ static void IntrKeyboardHandler(void) {
     
     bool breakCode;
 
-    uint8 scancode = inb(KBD_BUF_PORT);
+    uint8_t scancode = inb(KBD_BUF_PORT);
     
     // 若扫描码以e0开头，表示此键会产生多个扫描码，结束此次中断处理函数，等待下一个扫描码
     if (scancode == 0xe0) {
@@ -126,7 +126,7 @@ static void IntrKeyboardHandler(void) {
     breakCode = (scancode & 0x0080) != 0;
     if (breakCode) {
         // 是断码(按键弹起产生的扫描码)
-        uint16 makeCode = (scancode &= 0xff9f);
+        uint16_t makeCode = (scancode &= 0xff9f);
 
         if (makeCode == CTRL_L_MAKE || makeCode == SHIFT_R_CHAR) {
             gsCtrlStatus = false;
@@ -154,7 +154,7 @@ static void IntrKeyboardHandler(void) {
                 shift = false;
             }
         }
-        uint8 index = (scancode &= 0x00ff);
+        uint8_t index = (scancode &= 0x00ff);
         char curChar = gsKeymap[index][shift];
         if (curChar) {
             if (!IoQueueFull(&gKbdBuf)) {

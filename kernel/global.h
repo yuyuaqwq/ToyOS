@@ -56,9 +56,9 @@
 #define SELECTOR_TSS ((4 << 3) | TI_GDT | RPL0)
 
 typedef struct _GdtDesc {
-    uint16 limitLowWord;
-    uint16 baseLowWord;
-    uint32 highDword;
+    uint16_t limitLowWord;
+    uint16_t baseLowWord;
+    uint32_t highDword;
 } GdtDesc;
 
 
