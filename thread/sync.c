@@ -38,7 +38,7 @@ void SemaUp(Semaphore* pSema) {
     IntrStatus oldStatus = IntrDisable();
     ASSERT(pSema->value == 0);
     if (!ListEmpty(&pSema->waiters)) {
-        TaskStatus* threadBlocked = Elem2Entry(TaskStruct, generalTag, ListPop(&pSema->waiters));
+        TaskStatus* threadBlocked = ELEM_TO_ENTRY(TaskStruct, generalTag, ListPop(&pSema->waiters));
         ThreadUnblock(threadBlocked);
     }
     pSema->value++;

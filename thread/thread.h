@@ -64,11 +64,13 @@ typedef struct _ThreadStack {
     void* funcArg;
 } ThreadStack;
 
+typedef int16 Pid;
 /*
 * PCB
 */
 typedef struct _TaskStruct {
     uint32* selfKStack;     // 内核线程的栈指针，在 切出/切回 时 保存/恢复
+    Pid pid;
     TaskStatus status;
     char name[16];
     uint8 priority;

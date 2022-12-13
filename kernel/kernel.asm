@@ -97,3 +97,29 @@ VECTOR 0x2c, ZERO       ; ps/2 鼠标
 VECTOR 0x2d, ZERO       ; FPU浮点单元异常
 VECTOR 0x2e, ZERO       ; 硬盘
 VECTOR 0x2f, ZERO       ; 保留
+
+
+extern _gSyscallTable
+section .text
+; 80号中断
+_SyscallHandle:
+    ; 构造中断环境
+    push 0
+
+    push ds
+    push es
+    push fs
+    push gs
+    pushad
+
+    push 0x80
+
+    ; 压入r3参数
+    push edx
+    push ecx
+    push ebx
+    call [_gSyscallTable + eax*4]       ; 系统调用服务表
+    add esp, 12
+
+    mov [esp + 8*4], eax        ; 返回值存放到内核栈中eax的位置，交给popad恢复eax
+    jmp IntrExit

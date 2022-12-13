@@ -4,8 +4,8 @@
 #include "kernel/global.h"
 #include "lib/stdint.h"
 
-#define Offset(structType, member) (int)(&((structType*)0)->member)
-#define Elem2Entry(structType, structMemberName, pElemPtr) (structType*)((int)pElemPtr - Offset(structType, structMemberName))
+#define OFFSET(structType, member) (int)(&((structType*)0)->member)
+#define ELEM_TO_ENTRY(structType, structMemberName, pElemPtr) (structType*)((int)pElemPtr - OFFSET(structType, structMemberName))
 
 /*
 * 节点

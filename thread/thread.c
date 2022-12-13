@@ -54,7 +54,7 @@ void Schedule(void) {
     // 从就绪队列弹出第一个线程并切换到目标环境，完成线程切换
     gsThreadTag = NULL;
     gsThreadTag = ListPop(&gThreadReadyList);
-    TaskStruct* next = Elem2Entry(TaskStruct, generalTag, gsThreadTag);
+    TaskStruct* next = ELEM_TO_ENTRY(TaskStruct, generalTag, gsThreadTag);
     next->status = kTaskRunning;
     ProcessActivate(next);
     PutStr("newThreadName:"); PutStr(next->name); PutStr("\n");

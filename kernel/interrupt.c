@@ -43,7 +43,7 @@ static void PicInit(void) {
 
 #define IDT_DESC_CNT 0x81
 
-extern uint32 SyscallHandler(void);
+
 
 // 中断门描述符结构体
 typedef struct _GateDesc {
@@ -63,6 +63,10 @@ char* gIntrName[IDT_DESC_CNT];
 IntrHandler gIdtTable[IDT_DESC_CNT];
 extern IntrHandler gIntrEntryTable[IDT_DESC_CNT];
 
+/*
+* 系统调用中断入口
+*/
+extern uint32 SyscallHandler(void);
 
 /* 
 * 构建中断描述符
@@ -82,6 +86,8 @@ static void IdtDescInit(void) {
     for (int i = 0; i < IDT_DESC_CNT; i++) {
         MakeIdtDesc(&gIdt[i], IDT_DESC_ATTR_DPL0, gIntrEntryTable[i]);
     }
+
+    MakeIdtDesc(&gIdt[80], IDT_DESC_ATTR_DPL3, SyscallHandler);
     PutStr("    IdtDescInitDone\n");
 }
 
