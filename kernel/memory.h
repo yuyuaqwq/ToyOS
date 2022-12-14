@@ -51,14 +51,14 @@ void* MallocPage(PoolFlags pf, uint32_t pgCnt);
 void* GetKernelPages(uint32_t pgCnt);
 
 /*
-* 内存块
+* 内存块，用于连接到MemBlockDesc的空闲链表，也是分配给用户的整块内存
 */
 typedef struct _MemBlock {
-    ListElem freeElem;      // 链接空闲节点
+    ListElem freeElem;      // 链接空闲节点，分配给用户时该节点就被摘除了，因此并不额外占用空间
 } MemBlock;
 
 /*
-* 内存块描述符
+* 内存块描述符，描述了内存块的规格
 */
 typedef struct _MemBlockDesc {
     uint32_t blockSize;     // 内存块大小

@@ -264,7 +264,7 @@ static void MemPoolInit(uint32_t memByteTotal) {
 }
 
 /*
-* 内存仓库
+* 内存仓库，通常管理一页(超过1024时可能一个Arena管理多页)
 */
 typedef struct _Arena {
     MemBlockDesc* desc;     // 当前Arena关联的MemBlockDesc
@@ -281,18 +281,18 @@ void BlockDescInit(MemBlockDesc* descArray) {
     // 初始化7种规格的内存块描述符
     for (descIdx = 0; descIdx < DESC_CNT; descIdx++) {
         descArray[descIdx].blockSize = blockSize;
-        descArray[descIdx].blockPerArena = (PG_SIZE - sizeof(Arena)) / blockSize;
+        descArray[descIdx].blockPerArena = (PG_SIZE - sizeof(Arena)) / blockSize;       // 除去每个页面首部的Arena
         ListInit(&descArray[descIdx].freeList);
         blockSize *= 2;     // 下一规格的内存块大小
     }
 }
 
 static MemBlock* Arena2Block(Arena* a, uint32_t idx) {
-    return (MemBlock*)((uint32_t)a + sizeof(Arena) + idx * a->desc->blockSize);
+    return (MemBlock*)((uint32_t)a + sizeof(Arena) + idx * a->desc->blockSize);     // 略过Arena首部，定位到该索引对应的位置
 }
 
 static Arena* Block2Arena(MemBlock* b) {
-    return (Arena*)((uint32_t)b & 0xfffff000);
+    return (Arena*)((uint32_t)b & 0xfffff000);      // 页面首部即Arena的位置
 }
 
 void* SysMalloc(uint32_t size) {
@@ -323,18 +323,19 @@ void* SysMalloc(uint32_t size) {
     LockAcquire(&memPool->lock);
 
     if (size > 1024) {
+        // 超过1024字节，整页分配
         uint32_t pageCnt = DIV_ROUND_UP(size + sizeof(Arena), PG_SIZE);
 
+        // 前12字节是Arean头，存放元信息
         a = MallocPage(pf, pageCnt);
 
         if (a != NULL) {
             memset(a, 0, pageCnt * PG_SIZE);
-
-            a->desc = NULL;
+            a->desc = NULL;     // 不属于7种规格的内存块描述符
             a->cnt = pageCnt;
             a->large = true;
             LockRelease(&memPool->lock);
-            return (void*)(a + 1);
+            return (void*)(a + 1);      // 跨过Arean头，剩下是可用空间
         } else {
             LockRelease(&memPool->lock);
             return NULL;
@@ -342,6 +343,7 @@ void* SysMalloc(uint32_t size) {
     }
     else {
         uint32_t descIdx;
+        // 从7种规格中查找合适的内存大小
         for (descIdx = 0; descIdx < DESC_CNT; descIdx++) {
             if (size <= descs[descIdx].blockSize) {
                 break;
@@ -349,13 +351,15 @@ void* SysMalloc(uint32_t size) {
         }
 
         if (ListEmpty(&descs[descIdx].freeList)) {
-            a = MallocPage(pf, 1);
+            // 此规格的内存块已经消耗完毕
+            a = MallocPage(pf, 1);      // 分配一页内存创建新的Arena
             if (a == NULL) {
                 LockRelease(&memPool->lock);
                 return NULL;
             }
             memset(a, 0, PG_SIZE);
 
+            // 当前页面的Arena信息初始化
             a->desc = &descs[descIdx];
             a->large = false;
             a->cnt = descs[descIdx].blockPerArena;
@@ -363,14 +367,16 @@ void* SysMalloc(uint32_t size) {
 
             IntrStatus oldStatus = IntrDisable();
 
+            // 拆分内存块
             for (blockIdx = 0; blockIdx < descs[descIdx].blockPerArena; blockIdx++) {
-                b = Arena2Block(a, blockIdx);
+                b = Arena2Block(a, blockIdx);       // 每个内存块中，前面一部分是MemBlock头
                 ASSERT(!ElemFind(&a->desc->freeList, &b->freeElem));
-                ListAppend(&a->desc->freeList, &b->freeElem);
+                ListAppend(&a->desc->freeList, &b->freeElem);       // 分好的内存块插到空闲链表中
             }
             IntrSetStatus(oldStatus);
         }
 
+        // 分配一块MemBlock，前面一部分是MemBlock头并无关系，可以直接给用户使用，因为脱链了节点也就无效了，也不影响后续回收
         b = ELEM_TO_ENTRY(MemBlock, freeElem, ListPop(&(descs[descIdx].freeList)));
         memset(b, 0, descs[descIdx].blockSize);
 
