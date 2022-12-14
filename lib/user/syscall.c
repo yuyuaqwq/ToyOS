@@ -17,3 +17,11 @@ uint32_t GetPid() {
 uint32_t Write(char* str) {
     return SYSCALL1(kSysWrite, str);
 }
+
+void* malloc(uint32_t size) {
+    return SYSCALL1(kSysMalloc, size);
+}
+
+void free(void* ptr) {
+    SYSCALL1(kSysFree, ptr);
+}

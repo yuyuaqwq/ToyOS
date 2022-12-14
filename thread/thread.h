@@ -83,7 +83,7 @@ typedef struct _TaskStruct {
 
     uint32_t* pgDir;      // 进程页表虚拟地址
     VirAddrPool userprogVAddr;      // 用户进程虚拟地址池
-    MemBlockDesc userBlockDesc[DESC_CNT];       // 用户进程内存块描述符
+    MemBlockDesc userBlockDesc[MEM_DESC_CNT];       // 用户进程内存块描述符
     uint32_t stackMagic;
 } TaskStruct;
 

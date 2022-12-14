@@ -26,7 +26,7 @@ static void FrequencySet(uint8_t counterPort, uint8_t counterNo, uint8_t rwl, ui
 uint32_t gTicks;
 static void IntrTimerHandler(void) {
     TaskStruct* curThread = RunningThread();
-    ASSERT(curThread->stackMagic = 'THRE');
+    ASSERT(curThread->stackMagic == 'THRE');
 
     curThread->elapsedTicks++;
     gTicks++;

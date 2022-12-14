@@ -6,8 +6,14 @@
 typedef enum SyscallNr {
     kSysGetPid,
     kSysWrite,
+    kSysMalloc,
+    kSysFree,
 };
 
 uint32_t GetPid(void);
 uint32_t Write(char* str);
+
+void* malloc(uint32_t size);
+void free(void* ptr);
+
 #endif

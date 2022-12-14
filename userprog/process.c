@@ -18,6 +18,7 @@ extern void IntrExit(void);
 void StartProcess(void* fileName_) {
     void* function = fileName_;
     TaskStruct* cur = RunningThread();
+
     cur->selfKStack += sizeof(ThreadStack);
     IntrStack* procStack = (IntrStack*)cur->selfKStack;
     // 构建栈，通过iretd降权到r3
@@ -28,7 +29,8 @@ void StartProcess(void* fileName_) {
     procStack->eip = function;
     procStack->cs = SELECTOR_U_CODE;
     procStack->eflags = (EFLAGS_IOPL_0 | EFLAGS_MBS | EFLAGS_IF_1);
-    procStack->esp = (void*)((uint32_t)GetAPage(kPfUser, USER_STACK3_VADDR) + PG_SIZE);       // 分配用户进程栈
+    void* aaa = (void*)((uint32_t)GetAPage(kPfUser, USER_STACK3_VADDR) + PG_SIZE);
+    procStack->esp = aaa;       // 分配用户进程栈
     procStack->ss = SELECTOR_U_DATA;
     asm volatile("movl %0, %%esp; jmp IntrExit" : : "g"(procStack) : "memory");
 }
@@ -90,7 +92,7 @@ void CreateUserVAddrBitmap(TaskStruct* userProg) {
 * 启动新进程
 */
 void ProcessExecute(void* filename, char* name) {
-    // 进程与线程的区别并不明确，实际上都可以叫做进程，也都可以叫做线程
+    // 进程与线程的区别并不明确，所有的进程其实也都是一个线程，进程是虚拟的，只要有单独的页表，就可以归为进程，多个线程页表相同，属于同一个进程
     TaskStruct* pThread = GetKernelPages(1);        // 进程有自己的页目录
     ThreadInit(pThread, name, DEFAULT_PRIO);
     CreateUserVAddrBitmap(pThread);     // 进程需要管理自己的用户空间地址

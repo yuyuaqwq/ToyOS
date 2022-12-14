@@ -12,7 +12,7 @@ typedef void* syscall;
 syscall gSyscallTable[SYSCALL_NR];
 
 uint32_t SysGetPid(void) {
-    return RunningThread()->pid;
+    return RunningThread()->userBlockDesc[0].blockSize;
 }
 
 uint32_t SysWrite(char* str) {
@@ -24,5 +24,7 @@ void SyscallInit(void) {
     PutStr("SyscallInit start\n");
     gSyscallTable[kSysGetPid] = SysGetPid;
     gSyscallTable[kSysWrite] = SysWrite;
+    gSyscallTable[kSysMalloc] = SysMalloc;
+    gSyscallTable[kSysFree] = SysFree;
     PutStr("SyscallInit done\n");
 }

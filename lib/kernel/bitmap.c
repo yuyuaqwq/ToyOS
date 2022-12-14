@@ -2,7 +2,6 @@
 
 #include "lib/string.h"
 #include "lib/kernel/print.h"
-#include "kernel/interrupt.h"
 #include "kernel/debug.h"
 
 

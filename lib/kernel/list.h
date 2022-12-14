@@ -5,7 +5,7 @@
 #include "lib/stdint.h"
 
 #define OFFSET(structType, member) (int)(&((structType*)0)->member)
-#define ELEM_TO_ENTRY(structType, structMemberName, pElemPtr) (structType*)((int)pElemPtr - OFFSET(structType, structMemberName))
+#define ELEM_TO_ENTRY(structType, structMemberName, pElemPtr) (structType*)((uint32_t)pElemPtr - OFFSET(structType, structMemberName))
 
 /*
 * 节点
