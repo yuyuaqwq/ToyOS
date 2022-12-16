@@ -1,5 +1,6 @@
 BUILD_DIR = ./build
 TOOLS_DIR = ./tools
+DISK_DIR = ./disk
 ENTRY_POINT = 0xc0001500
 ENTRY_FUNCTION = main
 ASM = $(TOOLS_DIR)/nasm
@@ -18,7 +19,8 @@ OBJS_KERNEL = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	   $(BUILD_DIR)/stdio.o \
 	   $(BUILD_DIR)/kernel.o $(BUILD_DIR)/debug.o $(BUILD_DIR)/bitmap.o \
 	   $(BUILD_DIR)/print.o $(BUILD_DIR)/list.o $(BUILD_DIR)/syscall.o \
-	   $(BUILD_DIR)/syscall-init.o
+	   $(BUILD_DIR)/syscall-init.o $(BUILD_DIR)/stdio-kernel.o \
+	   $(BUILD_DIR)/ide.o
 
 
 # C编译
@@ -44,6 +46,11 @@ $(BUILD_DIR)/timer.o: device/timer.c device/timer.h lib/stdint.h \
 				lib/kernel/io.h lib/kernel/print.h
 		$(C) $(C_FLAGS) $< -o $@
 
+$(BUILD_DIR)/ide.o: device/ide.c device/ide.h lib/stdint.h \
+				device/timer.h kernel/interrupt.h kernel/memory.h \
+				lib/kernel/stdio-kernel.h lib/stdio.h lib/kernel/io.h
+		$(C) $(C_FLAGS) $< -o $@
+
 $(BUILD_DIR)/debug.o: kernel/debug.c kernel/debug.h \
 				lib/kernel/print.h lib/stdint.h kernel/interrupt.h
 		$(C) $(C_FLAGS) $< -o $@
@@ -52,8 +59,11 @@ $(BUILD_DIR)/string.o: lib/string.c lib/string.h lib/stdint.h kernel/global.h \
 				lib/stdint.h kernel/debug.h
 		$(C) $(C_FLAGS) $< -o $@
 
-$(BUILD_DIR)/stdio.o: lib/stdio.c lib/user/syscall.h
+$(BUILD_DIR)/stdio.o: lib/stdio.c lib/stdio.h lib/stdint.h kernel/interrupt.h \
+    	kernel/global.h lib/string.h lib/user/syscall.h lib/kernel/print.h \
+		lib/user/syscall.h
 		$(C) $(C_FLAGS) $< -o $@
+
 
 $(BUILD_DIR)/bitmap.o: lib/kernel/bitmap.c lib/kernel/bitmap.h \
 				kernel/global.h lib/stdint.h lib/string.h lib/stdint.h \
@@ -73,6 +83,10 @@ $(BUILD_DIR)/thread.o: thread/thread.c thread/thread.h lib/stdint.h \
 
 $(BUILD_DIR)/list.o: lib/kernel/list.c lib/kernel/list.h kernel/global.h \
 				lib/stdint.h kernel/interrupt.h 
+		$(C) $(C_FLAGS) $< -o $@
+
+$(BUILD_DIR)/stdio-kernel.o: lib/kernel/stdio-kernel.c lib/kernel/stdio-kernel.h lib/stdint.h \
+				lib/stdio.h lib/stdint.h device/console.h 
 		$(C) $(C_FLAGS) $< -o $@
 
 $(BUILD_DIR)/console.o: device/console.c device/console.h lib/stdint.h \
@@ -114,9 +128,7 @@ $(BUILD_DIR)/syscall-init.o: userprog/syscall-init.c userprog/syscall-init.h \
 	device/console.h
 		$(C) $(C_FLAGS) $< -o $@
 
-$(BUILD_DIR)/stdio.o: lib/stdio.c lib/stdio.h lib/stdint.h kernel/interrupt.h \
-    	kernel/global.h lib/string.h lib/user/syscall.h lib/kernel/print.h
-		$(C) $(C_FLAGS) $< -o $@
+
 
 # ASM编译
 $(BUILD_DIR)/kernel.o: kernel/kernel.asm
@@ -136,9 +148,9 @@ $(BUILD_DIR)/kernel.bin: $(OBJS_KERNEL)
 .PHONY: build hd clean all
 
 hd:
-		$(TOOLS_DIR)/filecp.exe $(BUILD_DIR)/disk.vhd 0 .\build\mbr.bin
-		$(TOOLS_DIR)/filecp.exe $(BUILD_DIR)/disk.vhd 1024 $(BUILD_DIR)/loader.bin
-		$(TOOLS_DIR)/filecp.exe $(BUILD_DIR)/disk.vhd 4608 $(BUILD_DIR)/kernel.bin
+		$(TOOLS_DIR)/filecp.exe $(DISK_DIR)/master.vhd 0 ./build/mbr.bin
+		$(TOOLS_DIR)/filecp.exe $(DISK_DIR)/master.vhd 1024 $(BUILD_DIR)/loader.bin
+		$(TOOLS_DIR)/filecp.exe $(DISK_DIR)/master.vhd 4608 $(BUILD_DIR)/kernel.bin
 
 clean:
 		del $(BUILD_DIR)/*.o

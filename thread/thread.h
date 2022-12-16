@@ -94,6 +94,7 @@ void ThreadCreate(TaskStruct* pThread, ThreadFunc function, void* funcArg);
 TaskStatus* ThreadStart(const char* name, int prio, ThreadFunc function, void* funcArg);
 void ThreadEnvirInit(void);
 
+void ThreadYIeld(void);
 void ThreadBlock(TaskStatus stat);
 void ThreadUnblock(TaskStruct* pThread);
 

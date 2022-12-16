@@ -7,6 +7,17 @@
 
 #include "userprog/process.h"
 
+TaskStruct* gIdelThread;
+
+static void Idle(void* arg) {
+    while (1) {
+        ThreadBlock(kTaskBlocked);
+        asm volatile("sti; hlt" : : : "memory");
+    }
+}
+
+
+
 /*
 * 内核线程初次被调度时执行的中转函数，从SwitchTo返回到此处
 */
@@ -61,7 +72,9 @@ void Schedule(void) {
         
     }
 
-    ASSERT(!ListEmpty(&gThreadReadyList));
+    if (ListEmpty(&gThreadReadyList)) {
+        ThreadUnblock(gIdelThread);
+    }
 
     // 从就绪队列弹出第一个线程并切换到目标环境，完成线程切换
     gsThreadTag = NULL;
@@ -173,6 +186,15 @@ void ThreadUnblock(TaskStruct* pThread) {
 }
 
 
+void ThreadYIeld(void) {
+    TaskStruct* cur = RunningThread();
+    IntrStatus oldStatus = IntrDisable();
+    ASSERT(!ElemFind(&gThreadReadyList, &cur->generalTag));
+    ListAppend(&gThreadReadyList, &cur->generalTag);
+    cur->status = kTaskReady;
+    Schedule();
+    IntrSetStatus(oldStatus);
+}
 
 
 
@@ -200,5 +222,8 @@ void ThreadEnvirInit(void) {
     ListInit(&gThreadReadyList);
     LockInit(&gPidLock);
     MakeMainThread();
+
+    gIdelThread = ThreadStart("idle", 10, Idle, NULL);
+
     PutStr("ThreadInitEnvir done\n");
 }

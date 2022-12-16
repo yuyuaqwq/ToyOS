@@ -3,11 +3,6 @@
 #include "lib/stdint.h"
 #include "lib/user/syscall.h"
 
-
-#define va_start(ap, v) ap = (va_list)&v
-#define va_arg(ap, t) *((t*)(ap += 4))
-#define va_end(ap) ap = NULL
-
 static void itoa(uint32_t value, char** bufPtrAddr, uint32_t base) {
     uint32_t m = value % base;
     uint32_t i = value / base;

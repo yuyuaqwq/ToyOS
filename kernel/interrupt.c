@@ -31,9 +31,10 @@ static void PicInit(void) {
     outb(PIC_S_DATA, 0x01);
 
 
-    // 打开主片上IR0，只打开时钟和键盘产生的中断
-    outb(PIC_M_DATA, 0xfc);
-    outb(PIC_S_DATA, 0xff);
+    // 主片上打开IRQ0(时钟)，IRQ1(键盘)，IRQ2(级联从片)
+    outb(PIC_M_DATA, 0xf8);
+    // 从片上打开IRQ14(硬盘)
+    outb(PIC_S_DATA, 0xbf);
 
     PutStr("    PicInit done\n");
 

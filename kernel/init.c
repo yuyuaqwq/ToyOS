@@ -6,9 +6,11 @@
 #include "device/timer.h"
 #include "device/console.h"
 #include "device/keyboard.h"
+#include "device/ide.h"
 #include "thread/thread.h"
 #include "userprog/tss.h"
 #include "userprog/syscall-init.h"
+
 
 void InitAll(void) {
     PutStr("InitAll\n");
@@ -20,4 +22,5 @@ void InitAll(void) {
     ConsoleInit();
     TssInit();
     SyscallInit();
+    IdeInit();
 }

@@ -23,6 +23,8 @@ static void FrequencySet(uint8_t counterPort, uint8_t counterNo, uint8_t rwl, ui
     outb(counterPort, (uint8_t )(counterValue >> 8));
 }
 
+#define MILLI_SECONDS_PER_INTR (1000 / IRQ0_FREQUENCY)
+
 uint32_t gTicks;
 static void IntrTimerHandler(void) {
     TaskStruct* curThread = RunningThread();
@@ -38,6 +40,19 @@ static void IntrTimerHandler(void) {
     }
 }
 
+static void TicksToSleep(uint32_t sleepTicks) {
+    uint32_t startTick = gTicks;
+
+    while (gTicks - startTick < sleepTicks) {
+        ThreadYIeld();
+    }
+}
+
+void MilliTimeSleep(uint32_t milliSeconds) {
+    uint32_t sleepTicks = DIV_ROUND_UP(milliSeconds, MILLI_SECONDS_PER_INTR);
+    ASSERT(sleepTicks > 0);
+    TicksToSleep(sleepTicks);
+}
 
 void TimerInit(void) {
     PutStr("TimerInit start\n");
