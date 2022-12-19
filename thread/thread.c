@@ -9,6 +9,9 @@
 
 TaskStruct* gIdelThread;
 
+/*
+* 系统空闲线程
+*/
 static void Idle(void* arg) {
     while (1) {
         ThreadBlock(kTaskBlocked);
@@ -185,7 +188,9 @@ void ThreadUnblock(TaskStruct* pThread) {
     IntrSetStatus(oldStatus);
 }
 
-
+/*
+* 当前线程让出cpu控制权
+*/
 void ThreadYIeld(void) {
     TaskStruct* cur = RunningThread();
     IntrStatus oldStatus = IntrDisable();

@@ -112,6 +112,7 @@ ListElem* ListTraversal(List* pList, function func, int arg) {
         if (func(pElem, arg)) {
             return pElem;
         }
+        pElem = pElem->next;
     }
     return NULL;
 }
