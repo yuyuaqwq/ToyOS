@@ -10,8 +10,8 @@ floppy_bootsig_check: disabled=0
 floppya: type=1_44
 # no floppyb
 ata0: enabled=true, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-ata0-master: type=disk, path="..\..\disk\master.vhd", mode=vpc, cylinders=301, heads=4, spt=17, sect_size=512, model="Generic 1234", biosdetect=cmos, translation=auto
-ata0-slave: type=disk, path="..\..\disk\slave.img", mode=flat, cylinders=162, heads=16, spt=63
+ata0-master: type=disk, path="..\..\disk\master.vhd", mode=vpc, cylinders=301, heads=4, spt=17, sect_size=512, model="master", biosdetect=cmos, translation=auto
+ata0-slave: type=disk, path="..\..\disk\slave.vhd", mode=vpc, cylinders=963, heads=10, spt=17, sect_size=512, model="slave", biosdetect=auto, translation=auto
 ata1: enabled=true, ioaddr1=0x170, ioaddr2=0x370, irq=15
 ata1-master: type=none
 ata1-slave: type=none
